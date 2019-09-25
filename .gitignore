@@ -1,0 +1,9 @@
+*.zip
+*.log
+*.csv
+.idea
+venv
+test.code-workspace
+examples
+.vscode
+.idea
