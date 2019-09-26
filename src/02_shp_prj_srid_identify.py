@@ -22,41 +22,47 @@ from time import strftime   # Load just the strftime Module from Time
 from datetime import datetime
 
 shpdir = "c:\\test"
+file_csv = str(strftime("%Y-%m-%d") + ".csv")
+
+
+
+if os.path.isfile(file_csv):
+    os.remove(file_csv)
 
 time1 = datetime.now()
 print('Starting at :' + str(time1))
 
-str_log = 'FILENAME, PRJ, SRID'
-print(str_log)
-#for file in os.listdir(shpdir):                               # Find all the shp files in the directory
-for root, subdirs, files in os.walk(shpdir):
-    for file in os.listdir(root):
-        file_path = str(os.path.join(root, file))
-        str_log = ''
-        ext = '.'.join(file.split('.')[1:]).lower()
-        if ext == "shp":
-            str_log = file_path
-            file_name = file_path.split('.')[0]
-            file_prj = file_name + '.prj'
-            if os.path.isfile(file_prj):
-                str_log = str_log + ',' + 'YES'
-                ident = Sridentify()
-                ident.from_file(file_prj)
-                srid = ident.get_epsg()
-                if len(str(srid)):
-                    str_log = str_log + ',' + str(srid)
+with open(file_csv, "a", errors='ignore') as file_csv_output:
+    str_log = 'FILENAME, PRJ, SRID'
+    print(str_log)
+    file_csv_output.write(str_log)
+    file_csv_output.write('\n')
+    #for file in os.listdir(shpdir):                               # Find all the shp files in the directory
+    for root, subdirs, files in os.walk(shpdir):
+        for file in os.listdir(root):
+            file_path = str(os.path.join(root, file))
+            str_log = ''
+            ext = '.'.join(file.split('.')[1:]).lower()
+            if ext == "shp":
+                str_log = file_path
+                file_name = file_path.split('.')[0]
+                file_prj = file_name + '.prj'
+                if os.path.isfile(file_prj):
+                    str_log = str_log + ',' + 'YES'
+                    ident = Sridentify()
+                    ident.from_file(file_prj)
+                    srid = ident.get_epsg()
+                    if len(str(srid)):
+                        str_log = str_log + ',' + str(srid)
+                    else:
+                        str_log = str_log + ',' + ''
                 else:
-                    str_log = str_log + ',' + ''
-            else:
-                str_log = str_log + ',' + 'NO'
-        if len(str_log):
-            print(str_log)
-            #files1 = strftime("%Y-%m-%d") + ".zip"
-
-
-
-
-
+                    str_log = str_log + ',' + 'NO'
+            if len(str_log):
+                file_csv_output.write(str_log)
+                file_csv_output.write('\n')
+                print(str_log)
+    file_csv_output.close()
 
 time2 = datetime.now()
 print('Finishing at :' + str(time2))
