@@ -7,6 +7,7 @@
 #   Created         : 25th September 2019
 #   Last Modified	: 25th September 2019
 #   Version		    : 1.0
+#   PIP             : pip install sridentify
 #
 # Modifications	: 1.1 -
 #               : 1.2 -
