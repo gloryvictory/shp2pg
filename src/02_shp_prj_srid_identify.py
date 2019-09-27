@@ -23,7 +23,7 @@ from time import strftime   # Load just the strftime Module from Time
 from datetime import datetime
 
 shpdir = "c:\\test"
-file_csv = str(strftime("%Y-%m-%d") + ".csv")
+file_csv = str(strftime("%Y-%m-%d") + "_shp_info_in_folder_" + ".csv")
 
 
 
@@ -34,7 +34,7 @@ time1 = datetime.now()
 print('Starting at :' + str(time1))
 
 with open(file_csv, "a", errors='ignore') as file_csv_output:
-    str_log = 'FILENAME, PRJ, SRID'
+    str_log = 'FILENAME, PRJ, SRID, METADATA'
     print(str_log)
     file_csv_output.write(str_log)
     file_csv_output.write('\n')
@@ -47,6 +47,8 @@ with open(file_csv, "a", errors='ignore') as file_csv_output:
             if ext == "shp":
                 str_log = file_path
                 file_name = file_path.split('.')[0]
+
+                # Prj file exist
                 file_prj = file_name + '.prj'
                 if os.path.isfile(file_prj):
                     str_log = str_log + ',' + 'YES'
@@ -56,9 +58,17 @@ with open(file_csv, "a", errors='ignore') as file_csv_output:
                     if len(str(srid)):
                         str_log = str_log + ',' + str(srid)
                     else:
-                        str_log = str_log + ',' + ''
+                        str_log = str_log + ',' + 'NO'
+                else:
+                    str_log = str_log + ',' + 'NO' + ',' + 'NO'
+
+                # Metadata exist
+                file_prj = file_name + '.shp.xml'
+                if os.path.isfile(file_prj):
+                    str_log = str_log + ',' + 'YES'
                 else:
                     str_log = str_log + ',' + 'NO'
+
             if len(str_log):
                 file_csv_output.write(str_log)
                 file_csv_output.write('\n')
