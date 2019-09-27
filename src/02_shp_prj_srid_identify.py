@@ -8,7 +8,7 @@
 #   Last Modified	: 25th September 2019
 #   Version		    : 1.0
 #   PIP             : pip install sridentify
-#
+#   RESULT          : csv file with columns: FILENAME, PRJ, SRID, METADATA
 # Modifications	: 1.1 -
 #               : 1.2 -
 #
