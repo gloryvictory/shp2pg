@@ -26,21 +26,29 @@ from datetime import datetime
 
 
 global dir_shp_in
-global dir_shp_out
-global program_ogr2ogr
+global program_shp2pgsql
 
 dir_shp_in = "c:\\test"
-dir_shp_out = "c:\\test2"
-program_ogr2ogr = "ogr2ogr"
+#dir_shp_in = "/mnt/gisdata"
+
+
+#global dir_shp_out
+#dir_shp_out = "c:\\test2"
+#global program_ogr2ogr
+
+#program_ogr2ogr = "ogr2ogr"
 #shp2pg_program = "shp2pg"
+program_shp2pgsql = 'shp2pgsql'
 
+global schema
+schema = 'GISSCHEMA'
 
-def dir_clear(dir_out =''):
-    if len(str(dir_out)) == 0:
-        dir_out = os.getcwd()
-    filelist = [f for f in os.listdir(dir_out)]
-    for f in filelist:
-        os.remove(os.path.join(dir_out, f))
+# def dir_clear(dir_out =''):
+#     if len(str(dir_out)) == 0:
+#         dir_out = os.getcwd()
+#     filelist = [f for f in os.listdir(dir_out)]
+#     for f in filelist:
+#         os.remove(os.path.join(dir_out, f))
 
 
 def shp_to_4326(dir_in='', dir_out=''):
@@ -53,22 +61,34 @@ def shp_to_4326(dir_in='', dir_out=''):
     for r, d, f in os.walk(dir_in):
         for file in f:
             file_in = str(os.path.join(r, file))
-            ff = file.split(".")[0] + "_4326" + ".shp"
-            file_out = str(os.path.join(dir_shp_out, ff))
+            #ff = file.split(".")[0] + "_4326" + ".shp"
+            #file_out = str(os.path.join(dir_shp_out, ff))
             ext = '.'.join(file.split('.')[1:]).lower()
+
+            file_name = file_in.split('.')[0]
+            table_name = file.split('.')[0]
             if ext == "shp":
+                # Prj file exist
+                file_prj = file_name + '.prj'
+                if os.path.isfile(file_prj):
+                    ident = Sridentify()
+                    ident.from_file(file_prj)
+                    srid = ident.get_epsg()
+                    if str(srid) != 'None':
+                        srid_source = ' -s ' + str(srid) + ':4326 '
+                        cmd_line = program_shp2pgsql + ' -I -W "utf-8"' + srid_source + ' ' + file_in + ' ' + schema + '.' + table_name + '-h 10.57.10.45 -u test -P test'
+                        print(cmd_line)
+
                 #print(os.path.join(r, file))
                 #print(file_in)
 
-                cmd_line = program_ogr2ogr + " -t_srs EPSG:4326 " + file_out + " " + file_in
-                print(cmd_line)
 
 def main():
     time1 = datetime.now()
     print('Starting at :' + str(time1))
 
-    dir_clear(dir_shp_out)
-    shp_to_4326(dir_shp_in, dir_shp_out)
+    #dir_clear(dir_shp_out)
+    shp_to_4326(dir_shp_in)
     #os.system(program_ogr2ogr + " -t_srs EPSG:4326 " +  file_in +" "+ file_out)
 
     time2 = datetime.now()
