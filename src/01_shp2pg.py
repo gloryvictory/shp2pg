@@ -23,13 +23,20 @@ from sridentify import Sridentify
 from time import strftime   # Load just the strftime Module from Time
 #import logging
 from datetime import datetime
+from sys import platform as _platform
 
 
 global dir_shp_in
 global program_shp2pgsql
 
+
 dir_shp_in = "c:\\test"
-#dir_shp_in = "/mnt/gisdata"
+
+# Linux platform
+if _platform == "linux" or _platform == "linux2" or _platform == "darwin":
+    dir_shp_in = "/mnt/gisdata"
+# Windows or Windows 64-bit
+#if _platform == "win32" or _platform == "win64":
 
 
 #global dir_shp_out
@@ -76,7 +83,7 @@ def shp_to_4326(dir_in='', dir_out=''):
                     srid = ident.get_epsg()
                     if str(srid) != 'None':
                         srid_source = ' -s ' + str(srid) + ':4326 '
-                        cmd_line = program_shp2pgsql + ' -I -W "utf-8"' + srid_source + ' ' + file_in + ' ' + schema + '.' + table_name + '-h 10.57.10.45 -u test -P test'
+                        cmd_line = program_shp2pgsql + ' -d -I -W "cp1251"' + srid_source + ' ' + file_in + ' ' + schema + '.' + table_name + '-h 10.57.10.45 -u test -P test'
                         print(cmd_line)
 
                 #print(os.path.join(r, file))
