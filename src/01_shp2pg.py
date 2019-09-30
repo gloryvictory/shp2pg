@@ -83,7 +83,7 @@ def shp_to_4326(dir_in='', dir_out=''):
                     srid = ident.get_epsg()
                     if str(srid) != 'None':
                         srid_source = ' -s ' + str(srid) + ':4326 '
-                        cmd_line = program_shp2pgsql + ' -d -I -W "cp1251"' + srid_source + ' ' + file_in + ' ' + schema + '.' + table_name + '-h 10.57.10.45 -u test -P test'
+                        cmd_line = program_shp2pgsql + ' -d -I -W "cp1251"' + srid_source + ' ' + file_in + ' ' + schema + '.' + table_name + '-h 10.57.10.45 -u test |psql -d gisdb -U test'
                         print(cmd_line)
 
                 #print(os.path.join(r, file))
