@@ -31,10 +31,10 @@ global program_shp2pgsql
 
 
 dir_shp_in = "c:\\test"
-
+dir_shp_in_linux = "/mnt/gisdata"
 # Linux platform
 if _platform == "linux" or _platform == "linux2" or _platform == "darwin":
-    dir_shp_in = "/mnt/gisdata"
+    dir_shp_in = dir_shp_in_linux
 # Windows or Windows 64-bit
 #if _platform == "win32" or _platform == "win64":
 

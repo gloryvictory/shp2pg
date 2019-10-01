@@ -19,13 +19,22 @@ import os.path
 
 from sridentify import Sridentify
 from time import strftime   # Load just the strftime Module from Time
-
+from sys import platform as _platform
 from datetime import datetime
 
-shpdir = "c:\\test"
+dir_shp_in = "c:\\test"
+dir_shp_in_linux = "/mnt/gisdata"
+# Linux platform
+if _platform == "linux" or _platform == "linux2" or _platform == "darwin":
+    dir_shp_in = dir_shp_in_linux
+# Windows or Windows 64-bit
+#if _platform == "win32" or _platform == "win64":
+
+
 file_csv = str(strftime("%Y-%m-%d") + "_shp_info_in_folder_" + ".csv")
 
 
+# get first line from file
 def file_get_first_line(filename=''):
     first_line = 'NO'
     if len(str(filename)):
@@ -33,6 +42,9 @@ def file_get_first_line(filename=''):
             first_line = f.readline()
             f.close()
     return first_line
+
+
+# ---------------- do main --------------------------------
 
 if os.path.isfile(file_csv):
     os.remove(file_csv)
@@ -45,8 +57,8 @@ with open(file_csv, "a", errors='ignore') as file_csv_output:
     print(str_log)
     file_csv_output.write(str_log)
     file_csv_output.write('\n')
-    #for file in os.listdir(shpdir):                               # Find all the shp files in the directory
-    for root, subdirs, files in os.walk(shpdir):
+    #for file in os.listdir(dir_shp_in):                               # Find all the shp files in the directory
+    for root, subdirs, files in os.walk(dir_shp_in):
         for file in os.listdir(root):
             file_path = str(os.path.join(root, file))
             str_log = ''
