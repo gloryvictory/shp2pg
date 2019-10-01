@@ -26,6 +26,13 @@ shpdir = "c:\\test"
 file_csv = str(strftime("%Y-%m-%d") + "_shp_info_in_folder_" + ".csv")
 
 
+def file_get_first_line(filename=''):
+    first_line = 'NO'
+    if len(str(filename)):
+        with open(filename) as f:
+            first_line = f.readline()
+            f.close()
+    return first_line
 
 if os.path.isfile(file_csv):
     os.remove(file_csv)
@@ -34,7 +41,7 @@ time1 = datetime.now()
 print('Starting at :' + str(time1))
 
 with open(file_csv, "a", errors='ignore') as file_csv_output:
-    str_log = 'FILENAME, PRJ, SRID, METADATA'
+    str_log = 'FILENAME, PRJ, SRID, METADATA,CODEPAGE'
     print(str_log)
     file_csv_output.write(str_log)
     file_csv_output.write('\n')
@@ -66,6 +73,13 @@ with open(file_csv, "a", errors='ignore') as file_csv_output:
                 file_prj = file_name + '.shp.xml'
                 if os.path.isfile(file_prj):
                     str_log = str_log + ',' + 'YES'
+                else:
+                    str_log = str_log + ',' + 'NO'
+
+                # Codepage exist
+                file_cp = file_name + '.cpg'
+                if os.path.isfile(file_cp):
+                    str_log = str_log + ',' + str(file_get_first_line(file_cp))
                 else:
                     str_log = str_log + ',' + 'NO'
 
