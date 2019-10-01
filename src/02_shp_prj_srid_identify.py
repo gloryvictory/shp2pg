@@ -41,7 +41,7 @@ time1 = datetime.now()
 print('Starting at :' + str(time1))
 
 with open(file_csv, "a", errors='ignore') as file_csv_output:
-    str_log = 'FILENAME, PRJ, SRID, METADATA,CODEPAGE'
+    str_log = 'FILENAME, PRJ, SRID, METADATA,CODEPAGE, HAS_DEFIS'
     print(str_log)
     file_csv_output.write(str_log)
     file_csv_output.write('\n')
@@ -80,6 +80,13 @@ with open(file_csv, "a", errors='ignore') as file_csv_output:
                 file_cp = file_name + '.cpg'
                 if os.path.isfile(file_cp):
                     str_log = str_log + ',' + str(file_get_first_line(file_cp))
+                else:
+                    str_log = str_log + ',' + 'NO'
+
+                # defis symbol has found in file name
+                file_1 = str(file_name)
+                if file_1.find('-') != -1:
+                    str_log = str_log + ',' + 'YES'
                 else:
                     str_log = str_log + ',' + 'NO'
 

@@ -6,9 +6,9 @@ load some shp-files to PostgreSQL+PostGIS
 
 ##Statistic  
 
-|FILENAME|PRJ|SRID|METADATA|CODEPAGE|
-|----------|:----:|:---:|:------:|:---:|
-|c:\test\Izuch\sta.shp|YES|4024|YES |ANSI 1251|
-|c:\test\Izuch\stb.shp|NO|NO|NO |NO|
-|c:\test\Izuch\sts.shp|YES|4326|NO |UTF-8|
-|c:\test\Izuch\stq.shp|YES|4024|YES |UTF-8|
+|FILENAME|PRJ|SRID|METADATA|CODEPAGE|HAS_DEFIS|
+|----------|:----:|:---:|:------:|:---:|:---:|
+|c:\test\Izuch\sta.shp|YES|4024|YES |ANSI 1251|NO|
+|c:\test\Izuch\stb.shp|NO|NO|NO |NO|NO|
+|c:\test\Izuch\sts-dd.shp|YES|4326|NO |UTF-8|YES|
+|c:\test\Izuch\stq.shp|YES|4024|YES |UTF-8|NO|
