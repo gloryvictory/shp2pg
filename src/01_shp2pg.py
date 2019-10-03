@@ -17,21 +17,19 @@
 
 import os                   # Load the Library Module
 import os.path
-
 from sridentify import Sridentify
-
 from time import strftime   # Load just the strftime Module from Time
 #import logging
 from datetime import datetime
 from sys import platform as _platform
 
+import cfg #some global configurations
 
 global dir_shp_in
 global program_shp2pgsql
 
-
-dir_shp_in = "c:\\test"
-dir_shp_in_linux = "/mnt/gisdata"
+dir_shp_in = cfg.folder_win
+dir_shp_in_linux = cfg.folder_linux
 # Linux platform
 if _platform == "linux" or _platform == "linux2" or _platform == "darwin":
     dir_shp_in = dir_shp_in_linux
@@ -48,7 +46,7 @@ if _platform == "linux" or _platform == "linux2" or _platform == "darwin":
 program_shp2pgsql = 'shp2pgsql'
 
 global schema
-schema = 'GISSCHEMA'
+schema = cfg.schema
 
 # def dir_clear(dir_out =''):
 #     if len(str(dir_out)) == 0:
@@ -83,7 +81,7 @@ def shp_to_4326(dir_in='', dir_out=''):
                     srid = ident.get_epsg()
                     if str(srid) != 'None':
                         srid_source = ' -s ' + str(srid) + ':4326 '
-                        cmd_line = program_shp2pgsql + ' -d -I -W "cp1251"' + srid_source + ' ' + file_in + ' \"' + schema + '\".\"' + table_name + "\"" + ' -h 10.57.10.45 -u test |psql -d gisdb -U test'
+                        cmd_line = program_shp2pgsql + ' -d -I -W "cp1251"' + srid_source + ' ' + file_in + ' \"' + schema + '\".\"' + table_name + "\"" + ' -h ' + cfg.host + ' -u ' + cfg.user + ' |psql -d ' + cfg.database_gis + ' -U '+ cfg.user
                         print(cmd_line)
 
                 #print(os.path.join(r, file))
