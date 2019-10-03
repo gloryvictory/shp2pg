@@ -30,6 +30,7 @@ if _platform == "linux" or _platform == "linux2" or _platform == "darwin":
 # Windows or Windows 64-bit
 #if _platform == "win32" or _platform == "win64":
 
+_delimiter = ','
 
 file_csv = str(strftime("%Y-%m-%d") + "_shp_info_in_folder_" + ".csv")
 
@@ -70,37 +71,40 @@ with open(file_csv, "a", errors='ignore') as file_csv_output:
                 # Prj file exist
                 file_prj = file_name + '.prj'
                 if os.path.isfile(file_prj):
-                    str_log = str_log + ',' + 'YES'
-                    ident = Sridentify()
-                    ident.from_file(file_prj)
-                    srid = ident.get_epsg()
+                    str_log = str_log + _delimiter + 'YES'
+                    try:
+                        ident = Sridentify()
+                        ident.from_file(file_prj)
+                        srid = ident.get_epsg()
+                    except:
+                        str_log = str_log + _delimiter + 'ERROR'
                     if len(str(srid)):
-                        str_log = str_log + ',' + str(srid)
+                        str_log = str_log + _delimiter + str(srid)
                     else:
-                        str_log = str_log + ',' + 'NO'
+                        str_log = str_log + _delimiter + 'NO'
                 else:
-                    str_log = str_log + ',' + 'NO' + ',' + 'NO'
+                    str_log = str_log + _delimiter + 'NO' + _delimiter + 'NO'
 
                 # Metadata exist
                 file_prj = file_name + '.shp.xml'
                 if os.path.isfile(file_prj):
-                    str_log = str_log + ',' + 'YES'
+                    str_log = str_log + _delimiter + 'YES'
                 else:
-                    str_log = str_log + ',' + 'NO'
+                    str_log = str_log + _delimiter + 'NO'
 
                 # Codepage exist
                 file_cp = file_name + '.cpg'
                 if os.path.isfile(file_cp):
-                    str_log = str_log + ',' + str(file_get_first_line(file_cp))
+                    str_log = str_log + _delimiter + str(file_get_first_line(file_cp))
                 else:
-                    str_log = str_log + ',' + 'NO'
+                    str_log = str_log + _delimiter + 'NO'
 
                 # defis symbol has found in file name
-                file_1 = str(file_name)
+                file_1 = str(file)
                 if file_1.find('-') != -1:
-                    str_log = str_log + ',' + 'YES'
+                    str_log = str_log + _delimiter + 'YES'
                 else:
-                    str_log = str_log + ',' + 'NO'
+                    str_log = str_log + _delimiter + 'NO'
 
             if len(str_log):
                 file_csv_output.write(str_log)
