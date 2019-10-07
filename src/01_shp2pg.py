@@ -22,7 +22,6 @@ from time import strftime   # Load just the strftime Module from Time
 #import logging
 from datetime import datetime
 from sys import platform as _platform
-
 import cfg #some global configurations
 
 global dir_shp_in
