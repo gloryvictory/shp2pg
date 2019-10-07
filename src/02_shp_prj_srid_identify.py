@@ -30,7 +30,7 @@ if _platform == "linux" or _platform == "linux2" or _platform == "darwin":
 # Windows or Windows 64-bit
 #if _platform == "win32" or _platform == "win64":
 
-_delimiter = ','
+_delimiter = ';'
 
 file_csv = str(strftime("%Y-%m-%d") + "_shp_info_in_folder_" + ".csv")
 
@@ -54,7 +54,7 @@ time1 = datetime.now()
 print('Starting at :' + str(time1))
 
 with open(file_csv, "a", errors='ignore') as file_csv_output:
-    str_log = 'FILENAME, PRJ, SRID, METADATA,CODEPAGE, HAS_DEFIS'
+    str_log = 'FILENAME' + _delimiter + 'PRJ' + _delimiter + 'SRID' + _delimiter + 'METADATA' + _delimiter + 'CODEPAGE' + _delimiter + 'HAS_DEFIS'
     print(str_log)
     file_csv_output.write(str_log)
     file_csv_output.write('\n')
