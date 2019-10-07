@@ -8,3 +8,5 @@ examples
 .vscode
 .idea
 cfg.py
+*.tar
+*.tar.gz
