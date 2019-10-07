@@ -21,6 +21,7 @@ from sys import platform as _platform
 from time import strftime   # Load just the strftime Module from Time
 from datetime import datetime
 from sridentify import Sridentify
+import csv
 
 import cfg #some global configurations
 
@@ -30,7 +31,7 @@ _delimiter = cfg.csv_delimiter
 
 # get first line from file
 def file_get_first_line(filename=''):
-    first_line = 'NO'
+    first_line = cfg.value_no
     if len(str(filename)):
         with open(filename) as f:
             first_line = f.readline()
@@ -57,79 +58,11 @@ def file_get_first_line(filename=''):
 #         result = detector.result['encoding']
 #         print(result)
 
-
-def do_shp_dir(dir_input=''):
-    file_csv = str(strftime("%Y-%m-%d") + "_shp_info_in_folder_" + ".csv")
-    if os.path.isfile(file_csv):
-        os.remove(file_csv)
-
-    with open(file_csv, "a", errors='ignore') as file_csv_output:
-        str_log = 'FILENAME' + _delimiter + 'PRJ' + _delimiter + 'SRID' + _delimiter + 'METADATA' + _delimiter + 'CODEPAGE' + _delimiter + 'HAS_DEFIS'
-        print(str_log)
-        file_csv_output.write(str_log)
-        file_csv_output.write('\n')
-        #for file in os.listdir(dir_shp_in):                               # Find all the shp files in the directory
-        for root, subdirs, files in os.walk(dir_input):
-            for file in os.listdir(root):
-                file_path = str(os.path.join(root, file))
-                str_log = ''
-                ext = '.'.join(file.split('.')[1:]).lower()
-                if ext == "shp":
-                    str_log = file_path
-                    file_name = file_path.split('.')[0]
-
-                    # Prj file exist
-                    file_prj = file_name + '.prj'
-                    if os.path.isfile(file_prj):
-                        str_log = str_log + _delimiter + 'YES'
-                        try:
-                            ident = Sridentify(call_remote_api=False)  #Sridentify() # if we need  remote call
-                            ident.from_file(file_prj)
-                            srid = ident.get_epsg()
-                            if len(str(srid)):
-                                str_log = str_log + _delimiter + str(srid)
-                            else:
-                                str_log = str_log + _delimiter + 'NO'
-                        except:
-                            str_log = str_log + _delimiter + 'ERROR'
-                    else:
-                        str_log = str_log + _delimiter + 'NO' + _delimiter + 'NO'
-
-                    # Metadata exist
-                    file_prj = file_name + '.shp.xml'
-                    if os.path.isfile(file_prj):
-                        str_log = str_log + _delimiter + 'YES'
-                    else:
-                        str_log = str_log + _delimiter + 'NO'
-
-                    # Codepage exist
-                    file_cp = file_name + '.cpg'
-                    if os.path.isfile(file_cp):
-                        str_log = str_log + _delimiter + str(file_get_first_line(file_cp))
-                    else:
-                        str_log = str_log + _delimiter + 'NO'
-
-                    # defis symbol has found in file name
-                    file_1 = str(file)
-                    if file_1.find('-') != -1:
-                        str_log = str_log + _delimiter + 'YES'
-                    else:
-                        str_log = str_log + _delimiter + 'NO'
-
-                if len(str_log):
-                    file_csv_output.write(str_log)
-                    file_csv_output.write('\n')
-                    print(str_log)
-        file_csv_output.close()
-
-
 def get_input_directory():
     # get from config
     dir_shp_in_win = cfg.folder_win
     dir_shp_in_linux = cfg.folder_linux
     dir_shp_in = str(os.getcwd())
-    qq = sys.argv
-
     # if only run the script (1 argument)
     if len(sys.argv) == 1:  # there is only one argument in command line
         # Linux platform
@@ -169,6 +102,77 @@ def get_input_directory():
         exit(1)
 
     return dir_shp_in
+
+
+def do_shp_dir(dir_input=''):
+    _yes = cfg.value_yes
+    _no = cfg.value_no
+    _error = cfg.value_error
+
+    file_csv = str(strftime("%Y-%m-%d") + "_shp_info_in_folder_" + ".csv")
+    if os.path.isfile(file_csv):
+        os.remove(file_csv)
+
+    csv_dict = {'FILENAME': '', 'PRJ': '', 'SRID': '', 'METADATA': '', 'CODEPAGE': '', 'HAS_DEFIS': ''}
+
+    with open(file_csv, 'w', newline='', encoding='utf-8') as csv_file:  # Just use 'w' mode in 3.x
+
+        csv_file_open = csv.DictWriter(csv_file, csv_dict.keys(), delimiter=cfg.csv_delimiter)
+        csv_file_open.writeheader()
+        for root, subdirs, files in os.walk(dir_input):
+            for file in os.listdir(root):
+                file_path = str(os.path.join(root, file))
+                str_log = ''
+                ext = '.'.join(file.split('.')[1:]).lower()
+                if ext == "shp":
+                    csv_dict['FILENAME'] = file_path
+                    file_name = file_path.split('.')[0]
+
+                    # Prj file exist
+                    file_prj = file_name + '.prj'
+                    if os.path.isfile(file_prj):
+                        csv_dict['PRJ'] = _yes
+                        try:
+                            ident = Sridentify(call_remote_api=False)  #Sridentify() # if we need  remote call
+                            ident.from_file(file_prj)
+                            srid = ident.get_epsg()
+                            if len(str(srid)):
+                                csv_dict['SRID'] = str(srid)
+                            else:
+                                csv_dict['SRID'] = _no
+                        except:
+                            csv_dict['SRID'] = _error
+                    else:
+                        csv_dict['PRJ'] = _no
+                        csv_dict['SRID'] = _no
+
+                    # Metadata exist
+                    file_prj = file_name + '.shp.xml'
+                    if os.path.isfile(file_prj):
+                        csv_dict['METADATA'] = _yes
+                    else:
+                        csv_dict['METADATA'] = _no
+
+                    # Codepage exist
+                    file_cp = file_name + '.cpg'
+                    if os.path.isfile(file_cp):
+                        csv_dict['CODEPAGE'] = str(file_get_first_line(file_cp))
+                    else:
+                        csv_dict['CODEPAGE'] = _no
+
+                    # defis symbol has found in file name
+                    file_1 = str(file)
+                    if file_1.find('-') != -1:
+                        csv_dict['HAS_DEFIS'] = _yes
+                    else:
+                        csv_dict['HAS_DEFIS'] = _no
+
+                #if len(str_log):
+                    csv_file_open.writerow(csv_dict)
+                    print(str(csv_dict.values()))
+        csv_file.close()
+
+
 
 
 # ---------------- do main --------------------------------
