@@ -22,6 +22,8 @@ from time import strftime   # Load just the strftime Module from Time
 from datetime import datetime
 from sridentify import Sridentify
 import csv
+from chardet.universaldetector import UniversalDetector
+
 
 import cfg #some global configurations
 
@@ -39,24 +41,24 @@ def file_get_first_line(filename=''):
     return first_line
 
 
-# def get_encoding():
-#     file_dbf = 'c:\\Glory\\MyPrj\\PycharmProjects\\dbf_test\\Lov.dbf'
-#     import glob
-#     from chardet.universaldetector import UniversalDetector
-#
-#     detector = UniversalDetector()
-#     # for filename in glob.glob('*.dbf'):
-#     filename = file_dbf
-#     print(filename.ljust(60)),
-#     detector.reset()
-#     with open(filename, "rb") as f:
-#         lines = f.readlines()
-#         for line in lines:
-#             detector.feed(line)
-#             if detector.done: break
-#         detector.close()
-#         result = detector.result['encoding']
-#         print(result)
+def get_encoding(file_dbf=''):
+    #file_dbf = 'c:\\Glory\\MyPrj\\PycharmProjects\\dbf_test\\Lov.dbf'
+    result = cfg.value_no
+    if os.path.isfile(file_dbf):
+        detector = UniversalDetector()
+        filename = file_dbf
+        print(filename.ljust(60)),
+        detector.reset()
+        with open(filename, "rb") as f:
+            lines = f.readlines()
+            for line in lines:
+                detector.feed(line)
+                if detector.done: break
+            detector.close()
+            result = detector.result['encoding']
+            print(result)
+            f.close()
+    return result
 
 def get_input_directory():
     # get from config
@@ -113,7 +115,7 @@ def do_shp_dir(dir_input=''):
     if os.path.isfile(file_csv):
         os.remove(file_csv)
 
-    csv_dict = {'FILENAME': '', 'PRJ': '', 'SRID': '', 'METADATA': '', 'CODEPAGE': '', 'HAS_DEFIS': ''}
+    csv_dict = {'FILENAME': '', 'PRJ': '', 'SRID': '', 'METADATA': '', 'CODEPAGE': '', 'CODEPAGE_DBF': '', 'HAS_DEFIS': ''}
 
     with open(file_csv, 'w', newline='', encoding='utf-8') as csv_file:  # Just use 'w' mode in 3.x
 
@@ -159,6 +161,14 @@ def do_shp_dir(dir_input=''):
                         csv_dict['CODEPAGE'] = str(file_get_first_line(file_cp))
                     else:
                         csv_dict['CODEPAGE'] = _no
+
+                    # Codepage DBF
+                    file_dbf = file_name + '.dbf'
+                    if os.path.isfile(file_dbf):
+
+                        csv_dict['CODEPAGE_DBF'] = get_encoding(file_dbf)
+                    else:
+                        csv_dict['CODEPAGE_DBF'] = _no
 
                     # defis symbol has found in file name
                     file_1 = str(file)
