@@ -1,12 +1,11 @@
 *.zip
 *.log
 *.csv
+*.tar
+*.tar.gz
 .idea
+.vscode
 venv
 test.code-workspace
 examples
-.vscode
-.idea
 cfg.py
-*.tar
-*.tar.gz
