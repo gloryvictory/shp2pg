@@ -8,7 +8,7 @@
 #   Last Modified	: 25th September 2019
 #   Version		    : 1.0
 #   PIP             : pip install sridentify
-#   RESULT          : csv file with columns: FILENAME, PRJ, SRID, METADATA, CODEPAGE
+#   RESULT          : csv file with columns: FILENAME;PRJ;SRID;METADATA;CODEPAGE;HAS_DEFIS;DATA_CREATION;DATA_MODIFY;DATA_LASTACCESS
 # Modifications	: 1.1 -
 #               : 1.2 -
 #
@@ -115,7 +115,7 @@ def do_shp_dir(dir_input=''):
     if os.path.isfile(file_csv):
         os.remove(file_csv)
 
-    csv_dict = {'FILENAME': '', 'PRJ': '', 'SRID': '', 'METADATA': '', 'CODEPAGE': '', 'CODEPAGE_DBF': '', 'HAS_DEFIS': ''}
+    csv_dict = {'FILENAME': '', 'PRJ': '', 'SRID': '', 'METADATA': '', 'CODEPAGE': '', 'HAS_DEFIS': '', 'DATA_CREATION': '', 'DATA_MODIFY': '', 'DATA_LASTACCESS': ''} #  'CODEPAGE_DBF': '', # CODEPAGE_DBF -  work a long time
 
     with open(file_csv, 'w', newline='', encoding='utf-8') as csv_file:  # Just use 'w' mode in 3.x
 
@@ -124,11 +124,14 @@ def do_shp_dir(dir_input=''):
         for root, subdirs, files in os.walk(dir_input):
             for file in os.listdir(root):
                 file_path = str(os.path.join(root, file))
-                str_log = ''
                 ext = '.'.join(file.split('.')[1:]).lower()
                 if ext == "shp":
                     csv_dict['FILENAME'] = file_path
                     file_name = file_path.split('.')[0]
+
+                    csv_dict['DATA_CREATION'] = str(datetime.fromtimestamp(os.path.getctime(file_path)).strftime('%Y-%m-%d'))
+                    csv_dict['DATA_MODIFY'] = str(datetime.fromtimestamp(os.path.getmtime(file_path)).strftime('%Y-%m-%d'))
+                    csv_dict['DATA_LASTACCESS'] = str(datetime.fromtimestamp(os.path.getatime(file_path)).strftime('%Y-%m-%d'))
 
                     # Prj file exist
                     file_prj = file_name + '.prj'
@@ -162,13 +165,13 @@ def do_shp_dir(dir_input=''):
                     else:
                         csv_dict['CODEPAGE'] = _no
 
-                    # Codepage DBF
-                    file_dbf = file_name + '.dbf'
-                    if os.path.isfile(file_dbf):
-
-                        csv_dict['CODEPAGE_DBF'] = get_encoding(file_dbf)
-                    else:
-                        csv_dict['CODEPAGE_DBF'] = _no
+                    # Codepage DBF - work long time
+                    # file_dbf = file_name + '.dbf'
+                    # if os.path.isfile(file_dbf):
+                    #
+                    #     csv_dict['CODEPAGE_DBF'] = get_encoding(file_dbf)
+                    # else:
+                    #     csv_dict['CODEPAGE_DBF'] = _no
 
                     # defis symbol has found in file name
                     file_1 = str(file)
