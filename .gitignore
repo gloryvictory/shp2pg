@@ -3,6 +3,7 @@
 *.csv
 *.tar
 *.tar.gz
+*.xlsx
 .idea
 .vscode
 venv

@@ -17,9 +17,12 @@
 import os                   # Load the Library Module
 import os.path
 import sys
+import time
 from sys import platform as _platform
 from time import strftime   # Load just the strftime Module from Time
 from datetime import datetime
+# non standard packages
+
 from sridentify import Sridentify
 import csv
 from chardet.universaldetector import UniversalDetector
@@ -28,7 +31,7 @@ from chardet.universaldetector import UniversalDetector
 import cfg #some global configurations
 
 #get some configs
-_delimiter = cfg.csv_delimiter
+#_delimiter = cfg.csv_delimiter
 
 
 # get first line from file
@@ -38,7 +41,7 @@ def file_get_first_line(filename=''):
         with open(filename) as f:
             first_line = f.readline()
             f.close()
-    return first_line
+    return str(first_line)
 
 
 def get_encoding(file_dbf=''):
@@ -111,11 +114,11 @@ def do_shp_dir(dir_input=''):
     _no = cfg.value_no
     _error = cfg.value_error
 
-    file_csv = str(strftime("%Y-%m-%d") + "_shp_info_in_folder_" + ".csv")
+    file_csv = cfg.file_csv     #str(strftime("%Y-%m-%d") + "_shp_info_in_folder_" + ".csv")
     if os.path.isfile(file_csv):
         os.remove(file_csv)
 
-    csv_dict = {'FILENAME': '', 'PRJ': '', 'SRID': '', 'METADATA': '', 'CODEPAGE': '', 'HAS_DEFIS': '', 'DATA_CREATION': '', 'DATA_MODIFY': '', 'DATA_LASTACCESS': ''} #  'CODEPAGE_DBF': '', # CODEPAGE_DBF -  work a long time
+    csv_dict = {'FILENAME': '', 'PRJ': '', 'SRID': '', 'METADATA': '', 'CODEPAGE': '', 'HAS_DEFIS': '', 'DATA_CREATION': '', 'DATA_MODIFY': '', 'DATA_LASTACCESS': '', 'DATA_SCRIPT_RUN': '', 'PRJ_INFO': ''} #  'CODEPAGE_DBF': '', # CODEPAGE_DBF -  work a long time
 
     with open(file_csv, 'w', newline='', encoding='utf-8') as csv_file:  # Just use 'w' mode in 3.x
 
@@ -123,9 +126,12 @@ def do_shp_dir(dir_input=''):
         csv_file_open.writeheader()
         for root, subdirs, files in os.walk(dir_input):
             for file in os.listdir(root):
+                for key in csv_dict:
+                    csv_dict[key] = ''
                 file_path = str(os.path.join(root, file))
                 ext = '.'.join(file.split('.')[1:]).lower()
                 if ext == "shp":
+                    csv_dict['DATA_SCRIPT_RUN'] = str(time.strftime("%Y-%m-%d"))
                     csv_dict['FILENAME'] = file_path
                     file_name = file_path.split('.')[0]
 
@@ -136,6 +142,7 @@ def do_shp_dir(dir_input=''):
                     # Prj file exist
                     file_prj = file_name + '.prj'
                     if os.path.isfile(file_prj):
+                        csv_dict['PRJ_INFO'] = file_get_first_line(file_prj)
                         csv_dict['PRJ'] = _yes
                         try:
                             ident = Sridentify(call_remote_api=False)  #Sridentify() # if we need  remote call
@@ -186,6 +193,16 @@ def do_shp_dir(dir_input=''):
         csv_file.close()
 
 
+def csv2xls():
+    file_excel = cfg.file_csv.split('.')[0] + '.xlsx'
+    try:
+        import pandas as pd
+    except:
+        print("we need pands. try: pip install pandas")
+    df_new = pd.read_csv(cfg.file_csv, sep=cfg.csv_delimiter)
+    writer = pd.ExcelWriter(file_excel)
+    df_new.to_excel(writer, index=False)
+    writer.save()
 
 
 # ---------------- do main --------------------------------
@@ -196,6 +213,9 @@ def main():
     dir_input = get_input_directory()
 
     do_shp_dir(dir_input)
+
+    csv2xls()
+
 
     time2 = datetime.now()
     print('Finishing at :' + str(time2))
