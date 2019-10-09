@@ -3,11 +3,11 @@
 #
 #   Author          :   Viacheslav Zamaraev
 #   email           :   zamaraev@gmail.com
-#   Script Name     : 01_shp2pg.py
+#   Script Name     : 02_shp_prj_srid_identify.py
 #   Created         : 25th September 2019
 #   Last Modified	: 25th September 2019
 #   Version		    : 1.0
-#   PIP             : pip install sridentify
+#   PIP             : pip install sridentify chardet openpyxl pandas
 #   RESULT          : csv file with columns: FILENAME;PRJ;SRID;METADATA;CODEPAGE;HAS_DEFIS;DATA_CREATION;DATA_MODIFY;DATA_LASTACCESS
 # Modifications	: 1.1 -
 #               : 1.2 -
@@ -21,18 +21,12 @@ import time
 from sys import platform as _platform
 from time import strftime   # Load just the strftime Module from Time
 from datetime import datetime
-# non standard packages
-
-from sridentify import Sridentify
 import csv
+# non standard packages
+from sridentify import Sridentify
 from chardet.universaldetector import UniversalDetector
-
-
-import cfg #some global configurations
-
-#get some configs
-#_delimiter = cfg.csv_delimiter
-
+#some global configurations
+import cfg
 
 # get first line from file
 def file_get_first_line(filename=''):
