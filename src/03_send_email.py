@@ -14,87 +14,99 @@
 #
 # Description   : This script will send result Excel file to people
 
-import os                   # Load the Library Module
+# import os                   # Load the Library Module
 from datetime import datetime
 from email import encoders
-from email.mime.multipart import MIMEMultipart
-#from email.mime.image import MIMEImage
-from email.mime.text import MIMEText
-from email.mime.base import MIMEBase
 import smtplib
-
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEBase
+from email.mime.multipart import MIMEMultipart
+from email.header import Header
+#from base64 import encodebytes
+#import email
+import os
 
 
 import cfg
 
 
 def send_email_with_file(file_excel=''):
-
     if (len(str(file_excel))):
-        host = cfg.HOST_MAIL
-        port = cfg.HOST_MAIL_PORT
-        msg = MIMEMultipart()
-        msg['Subject'] = cfg.SEND_TEXT
-        msg['From'] = cfg.SEND_FROM
-        msg['To'] = cfg.SEND_TO
-        msg.preamble = 'excel'
-        fp = open(file_excel, 'rb')
-        xls = MIMEBase('application', 'vnd.ms-excel')
-        xls.set_payload(fp.read())
-        fp.close()
-        encoders.encode_base64(xls)
-        xls.add_header('Content-Disposition', 'attachment', filename=file_excel)
-        msg.attach(xls)
-        s = smtplib.SMTP(host, port)
-        s.sendmail(msg['From'], msg['To'], msg.as_string())
-        s.quit()
-
+        body_text = str('ОК - файл ' + file_excel + " Во вложении!")
+        subject = 'Результат запуска скрипта. Excel file - ситуация с шейп-файлами'  # заголовок письма
+        send_email(cfg.server_mail, cfg.server_mail_port, cfg.send_from, cfg.send_to, subject, body_text, file_excel)
 
 def send_email_with_ERROR(file_excel=''):
-    host = cfg.HOST_MAIL
-    port = cfg.HOST_MAIL_PORT
-    body_text = str('ERROR - нет такого файла ' + file_excel + " Сообщите о проблеме в службу ИТ!").encode('utf-8', 'ignore').decode('ascii', 'ignore')
-    BODY = "\r\n".join((
-         "From: %s" % cfg.SEND_FROM,
-         "To: %s" % cfg.SEND_TO,
-         "Subject: %s" % body_text,
-         "",
-         body_text
-     ))
-    msg = MIMEMultipart()
-    msg['To'] = cfg.SEND_TO
-    msg['From'] = cfg.SEND_FROM
-    msg['Subject'] = "Добро пожаловать в реальный мир"
-    #msg.attach(MIMEText(body_text, 'html', _charset='utf-8'))
-    #msg = MIMEText(msg.encode('utf-8'), 'plain', 'utf-8')
-    #text = msg.as_string()
-    textpart = MIMEText(body_text.encode('utf-8'), 'plain', 'UTF-8')
-    msg.attach(textpart)
-    #msg.attach(MIMEText(body_text, 'plain'))
-    msg.add_header('From', 'Monitoring')
-    msg.add_header('Reply-To', 'Monitoring')
-    msg.add_header('X-Mailer', 'Python')
-    msg.add_header('Content-type', 'text/html charset=utf-8')
-
-    # Добавление текста сообщения
-    msg.attach(MIMEText(body_text))
+    body_text = str('ERROR - нет такого файла ' + file_excel + " Сообщите о проблеме в службу ИТ!")
+    subject = 'ERROR - Ошибка запуска скрипта'  # заголовок письма
+    send_email(cfg.server_mail, cfg.server_mail_port, cfg.send_from, cfg.send_to, subject, body_text, file_excel)
 
 
-    s = smtplib.SMTP(host, port)
-    s.sendmail(cfg.SEND_FROM, cfg.SEND_TO, msg.as_string())
-    s.quit()
 
+def send_email(_server ='', _port='25', _from='', _to='', _subj='', _text='', _file=''):
+    # Параметры SMTP-сервера
+    smtp_server = _server
+    smtp_port = _port
+    #smtp_user = ""     # пользователь smtp
+    #smtp_pwd = ""      # пароль smtp
+
+    mail_from = _from   # отправитель
+    mail_to = _to       # получатель
+    mail_text = _text
+    mail_subj = _subj
+    mail_coding = 'windows-1251'
+    attach_file = _file  # прикрепляемый файл
+
+    # формирование сообщения
+    multi_msg = MIMEMultipart()
+    multi_msg['From'] = Header(mail_from, mail_coding)
+    multi_msg['To'] = Header(mail_to, mail_coding)
+    multi_msg['Subject'] = Header(mail_subj, mail_coding)
+
+    msg = MIMEText(mail_text.encode('cp1251'), 'plain', mail_coding)
+    msg.set_charset(mail_coding)
+    multi_msg.attach(msg)
+
+    # присоединяем атач-файл
+    if (os.path.exists(attach_file) and os.path.isfile(attach_file)):
+        file = open(attach_file, 'rb')
+        attachment = MIMEBase('application', "octet-stream")
+        attachment.set_payload(file.read())
+        encoders.encode_base64(attachment)
+        file.close()
+        only_name_attach = Header(os.path.basename(attach_file), mail_coding);
+        attachment.add_header('Content-Disposition', 'attachment; filename="%s"' % only_name_attach)
+        multi_msg.attach(attachment)
+        # msg.preamble = 'excel'
+        # fp = open(file_excel, 'rb')
+        # xls = MIMEBase('application', 'vnd.ms-excel')
+        # xls.set_payload(fp.read())
+        # fp.close()
+        # encoders.encode_base64(xls)
+        # xls.add_header('Content-Disposition', 'attachment', filename=file_excel)
+        # msg.attach(xls)
+    else:
+        if (attach_file.lstrip() != ""):
+            print("Файл для атача не найден - " + attach_file)
+
+    # отправка
+    smtp = smtplib.SMTP(smtp_server, smtp_port)
+    # smtp.ehlo()
+    # smtp.starttls()
+    # smtp.ehlo()
+    # smtp.login(smtp_user, smtp_pwd)
+    smtp.sendmail(mail_from, mail_to, multi_msg.as_string())
 
 
 def main():
     time1 = datetime.now()
     print('Starting at :' + str(time1))
 
-    file_excel = cfg.file_csv.split('.')[0] + '.xlsx1'
+    file_excel = cfg.file_csv.split('.')[0] + '.xlsx'
     if os.path.isfile(file_excel):
         send_email_with_file(file_excel)
     else:
-        send_email_with_ERROR()
+        send_email_with_ERROR(file_excel)
 
     time2 = datetime.now()
     print('Finishing at :' + str(time2))
