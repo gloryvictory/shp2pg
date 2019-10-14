@@ -3,7 +3,7 @@
 #
 #   Author          : Viacheslav Zamaraev
 #   email           : zamaraev@gmail.com
-#   Script Name     : 01_shp2pg.py
+#   Script Name     : 04_shp2pg.py
 #   Created         : 25th September 2019
 #   Last Modified	: 25th September 2019
 #   Version		    : 1.0

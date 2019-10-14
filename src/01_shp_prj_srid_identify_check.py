@@ -3,7 +3,7 @@
 #
 #   Author          :   Viacheslav Zamaraev
 #   email           :   zamaraev@gmail.com
-#   Script Name     : 02_shp_prj_srid_identify.py
+#   Script Name     : 01_shp_prj_srid_identify_check.py
 #   Created         : 25th September 2019
 #   Last Modified	: 25th September 2019
 #   Version		    : 1.0
@@ -183,20 +183,20 @@ def do_shp_dir(dir_input=''):
 
                 #if len(str_log):
                     csv_file_open.writerow(csv_dict)
-                    print(str(csv_dict.values()))
+                    #print(str(csv_dict.values()))
         csv_file.close()
 
 
-def csv2xls():
-    file_excel = cfg.file_csv.split('.')[0] + '.xlsx'
-    try:
-        import pandas as pd
-    except:
-        print("we need pands. try: pip install pandas")
-    df_new = pd.read_csv(cfg.file_csv, sep=cfg.csv_delimiter)
-    writer = pd.ExcelWriter(file_excel)
-    df_new.to_excel(writer, index=False)
-    writer.save()
+# def csv2xls():
+#     file_excel = cfg.file_csv.split('.')[0] + '.xlsx'
+#     try:
+#         import pandas as pd
+#     except:
+#         print("we need pands. try: pip install pandas")
+#     df_new = pd.read_csv(cfg.file_csv, sep=cfg.csv_delimiter)
+#     writer = pd.ExcelWriter(file_excel)
+#     df_new.to_excel(writer, index=False)
+#     writer.save()
 
 
 # ---------------- do main --------------------------------
@@ -208,7 +208,7 @@ def main():
 
     do_shp_dir(dir_input)
 
-    csv2xls()
+    # csv2xls()
 
 
     time2 = datetime.now()
