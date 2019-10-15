@@ -36,11 +36,11 @@ def get_output_directory():
     # Linux platform
     if _platform == "linux" or _platform == "linux2" or _platform == "darwin":
         dir_out = cfg.folder_out_linux
-        if (os.path.exists(dir_out) and os.path.isdir(dir_out)):
+        if os.path.exists(dir_out) and os.path.isdir(dir_out):
             return dir_out
     if _platform == "win32" or _platform == "win64":  # Windows or Windows 64-bit
         dir_out = cfg.folder_out_win
-        if (os.path.exists(dir_out) and os.path.isdir(dir_out)):
+        if os.path.exists(dir_out) and os.path.isdir(dir_out):
             return dir_out
     else:
         dir_out = str(os.getcwd())
@@ -88,7 +88,7 @@ def send_email(_server ='', _port='25', _from='', _to='', _subj='', _text='', _f
     multi_msg.attach(msg)
 
     # присоединяем атач-файл
-    if (os.path.exists(attach_file) and os.path.isfile(attach_file)):
+    if os.path.exists(attach_file) and os.path.isfile(attach_file):
         file = open(attach_file, 'rb')
         attachment = MIMEBase('application', "octet-stream")
         attachment.set_payload(file.read())
@@ -106,7 +106,7 @@ def send_email(_server ='', _port='25', _from='', _to='', _subj='', _text='', _f
         # xls.add_header('Content-Disposition', 'attachment', filename=file_excel)
         # msg.attach(xls)
     else:
-        if (attach_file.lstrip() != ""):
+        if attach_file.lstrip() != "":
             print("Файл для атача не найден - " + attach_file)
 
     # отправка

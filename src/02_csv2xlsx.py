@@ -33,11 +33,11 @@ def get_output_directory():
     # Linux platform
     if _platform == "linux" or _platform == "linux2" or _platform == "darwin":
         dir_out = cfg.folder_out_linux
-        if (os.path.exists(dir_out) and os.path.isdir(dir_out)):
+        if os.path.exists(dir_out) and os.path.isdir(dir_out):
             return dir_out
     if _platform == "win32" or _platform == "win64":  # Windows or Windows 64-bit
         dir_out = cfg.folder_out_win
-        if (os.path.exists(dir_out) and os.path.isdir(dir_out)):
+        if os.path.exists(dir_out) and os.path.isdir(dir_out):
             return dir_out
     else:
         dir_out = str(os.getcwd())

@@ -25,8 +25,9 @@ import csv
 # non standard packages
 from sridentify import Sridentify
 from chardet.universaldetector import UniversalDetector
-#some global configurations
-import cfg
+
+import cfg #some global configurations
+
 
 # get first line from file
 def file_get_first_line(filename=''):
@@ -56,6 +57,7 @@ def get_encoding(file_dbf=''):
             print(result)
             f.close()
     return result
+
 
 def get_input_directory():
     # get from config
@@ -107,20 +109,17 @@ def get_output_directory():
     # Linux platform
     if _platform == "linux" or _platform == "linux2" or _platform == "darwin":
         dir_out = cfg.folder_out_linux
-        if (os.path.exists(dir_out) and os.path.isdir(dir_out)):
+        if os.path.exists(dir_out) and os.path.isdir(dir_out):
             return dir_out
     if _platform == "win32" or _platform == "win64":  # Windows or Windows 64-bit
         dir_out = cfg.folder_out_win
-        if (os.path.exists(dir_out) and os.path.isdir(dir_out)):
+        if os.path.exists(dir_out) and os.path.isdir(dir_out):
             return dir_out
     else:
         dir_out = str(os.getcwd())
         print('Output directories from config wrong: ' + cfg.folder_out_win + ' or ' + cfg.folder_out_linux + ' Using current directory: ' + dir_out)
     print('Using Output directory: ' + dir_out)
     return dir_out
-
-
-
 
 
 def do_shp_dir(dir_input=''):
@@ -143,11 +142,11 @@ def do_shp_dir(dir_input=''):
         csv_file_open.writeheader()
         for root, subdirs, files in os.walk(dir_input):
             for file in os.listdir(root):
-                for key in csv_dict:
-                    csv_dict[key] = ''
                 file_path = str(os.path.join(root, file))
                 ext = '.'.join(file.split('.')[1:]).lower()
                 if ext == "shp":
+                    for key in csv_dict:
+                        csv_dict[key] = ''
                     csv_dict['DATA_SCRIPT_RUN'] = str(time.strftime("%Y-%m-%d"))
                     csv_dict['FILENAME'] = file_path
                     file_name = file_path.split('.')[0]
@@ -171,6 +170,7 @@ def do_shp_dir(dir_input=''):
                                 csv_dict['SRID'] = _no
                         except:
                             csv_dict['SRID'] = _error
+                            continue
                     else:
                         csv_dict['PRJ'] = _no
                         csv_dict['SRID'] = _no
@@ -208,19 +208,6 @@ def do_shp_dir(dir_input=''):
                     csv_file_open.writerow(csv_dict)
                     #print(str(csv_dict.values()))
         csv_file.close()
-
-
-# def csv2xls():
-#     file_excel = cfg.file_csv.split('.')[0] + '.xlsx'
-#     try:
-#         import pandas as pd
-#     except:
-#         print("we need pands. try: pip install pandas")
-#     df_new = pd.read_csv(cfg.file_csv, sep=cfg.csv_delimiter)
-#     writer = pd.ExcelWriter(file_excel)
-#     df_new.to_excel(writer, index=False)
-#     writer.save()
-
 
 # ---------------- do main --------------------------------
 def main():
