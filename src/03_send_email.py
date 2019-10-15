@@ -71,7 +71,7 @@ def send_email(_server ='', _port='25', _from='', _to='', _subj='', _text='', _f
     #smtp_pwd = ""      # пароль smtp
 
     mail_from = _from   # отправитель
-    mail_to = _to       # получатель
+    mail_to = _to.split(',')       # получатель
     mail_text = _text
     mail_subj = _subj
     mail_coding = 'windows-1251'
@@ -80,7 +80,7 @@ def send_email(_server ='', _port='25', _from='', _to='', _subj='', _text='', _f
     # формирование сообщения
     multi_msg = MIMEMultipart()
     multi_msg['From'] = Header(mail_from, mail_coding)
-    multi_msg['To'] = Header(mail_to, mail_coding)
+    multi_msg['To'] = Header(_to, mail_coding)
     multi_msg['Subject'] = Header(mail_subj, mail_coding)
 
     msg = MIMEText(mail_text.encode('cp1251'), 'plain', mail_coding)
@@ -115,7 +115,7 @@ def send_email(_server ='', _port='25', _from='', _to='', _subj='', _text='', _f
     # smtp.starttls()
     # smtp.ehlo()
     # smtp.login(smtp_user, smtp_pwd)
-    recipients =
+
     smtp.sendmail(mail_from, mail_to, multi_msg.as_string())
 
 
