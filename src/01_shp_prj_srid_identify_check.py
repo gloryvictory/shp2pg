@@ -99,16 +99,39 @@ def get_input_directory():
         print("Arguments much more than 1! Please use only path as an argument. (Script.py /mnt/some_path) ")
         print(sys.argv, len(sys.argv))
         exit(1)
-
     return dir_shp_in
+
+
+def get_output_directory():
+    dir_out = str(os.getcwd())
+    # Linux platform
+    if _platform == "linux" or _platform == "linux2" or _platform == "darwin":
+        dir_out = cfg.folder_out_linux
+        if (os.path.exists(dir_out) and os.path.isdir(dir_out)):
+            return dir_out
+    if _platform == "win32" or _platform == "win64":  # Windows or Windows 64-bit
+        dir_out = cfg.folder_out_win
+        if (os.path.exists(dir_out) and os.path.isdir(dir_out)):
+            return dir_out
+    else:
+        dir_out = str(os.getcwd())
+        print('Output directories from config wrong: ' + cfg.folder_out_win + ' or ' + cfg.folder_out_linux + ' Using current directory: ' + dir_out)
+    print('Using Output directory: ' + dir_out)
+    return dir_out
+
+
+
 
 
 def do_shp_dir(dir_input=''):
     _yes = cfg.value_yes
     _no = cfg.value_no
     _error = cfg.value_error
+    #file_csv = cfg.file_csv
 
-    file_csv = cfg.file_csv     #str(strftime("%Y-%m-%d") + "_shp_info_in_folder_" + ".csv")
+    file_csv = str(os.path.join(get_output_directory(), cfg.file_csv))     #str(strftime("%Y-%m-%d") + "_shp_info_in_folder_" + ".csv")
+    #file_csv = cfg.file_csv     #str(strftime("%Y-%m-%d") + "_shp_info_in_folder_" + ".csv")
+
     if os.path.isfile(file_csv):
         os.remove(file_csv)
 

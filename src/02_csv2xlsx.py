@@ -16,6 +16,8 @@
 
 import os.path
 from datetime import datetime
+from sys import platform as _platform
+import os.path
 
 try:
     import pandas as pd
@@ -26,11 +28,29 @@ except:
 #some global configurations
 import cfg
 
+def get_output_directory():
+    dir_out = str(os.getcwd())
+    # Linux platform
+    if _platform == "linux" or _platform == "linux2" or _platform == "darwin":
+        dir_out = cfg.folder_out_linux
+        if (os.path.exists(dir_out) and os.path.isdir(dir_out)):
+            return dir_out
+    if _platform == "win32" or _platform == "win64":  # Windows or Windows 64-bit
+        dir_out = cfg.folder_out_win
+        if (os.path.exists(dir_out) and os.path.isdir(dir_out)):
+            return dir_out
+    else:
+        dir_out = str(os.getcwd())
+        print('Output directories from config wrong: ' + cfg.folder_out_win + ' or ' + cfg.folder_out_linux + ' Using current directory: ' + dir_out)
+    print('Using Output directory: ' + dir_out)
+    return dir_out
+
 
 def csv2xls(filename=''):
+
     if (os.path.exists(filename) and os.path.isfile(filename)):
         file_excel = filename.split('.')[0] + '.xlsx'
-        df_new = pd.read_csv(cfg.file_csv, sep=cfg.csv_delimiter)
+        df_new = pd.read_csv(filename, sep=cfg.csv_delimiter)
         writer = pd.ExcelWriter(file_excel)
         df_new.to_excel(writer, index=False)
         writer.save()
@@ -42,7 +62,8 @@ def main():
     time1 = datetime.now()
     print('Starting at :' + str(time1))
 
-    csv2xls(cfg.file_csv)
+    file_csv = str(os.path.join(get_output_directory(), cfg.file_csv))
+    csv2xls(file_csv)
 
     time2 = datetime.now()
     print('Finishing at :' + str(time2))

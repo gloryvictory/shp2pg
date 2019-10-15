@@ -25,9 +25,29 @@ from email.header import Header
 #from base64 import encodebytes
 #import email
 import os
-
+from sys import platform as _platform
+import os.path
 
 import cfg
+
+
+def get_output_directory():
+    dir_out = str(os.getcwd())
+    # Linux platform
+    if _platform == "linux" or _platform == "linux2" or _platform == "darwin":
+        dir_out = cfg.folder_out_linux
+        if (os.path.exists(dir_out) and os.path.isdir(dir_out)):
+            return dir_out
+    if _platform == "win32" or _platform == "win64":  # Windows or Windows 64-bit
+        dir_out = cfg.folder_out_win
+        if (os.path.exists(dir_out) and os.path.isdir(dir_out)):
+            return dir_out
+    else:
+        dir_out = str(os.getcwd())
+        print('Output directories from config wrong: ' + cfg.folder_out_win + ' or ' + cfg.folder_out_linux + ' Using current directory: ' + dir_out)
+    print('Using Output directory: ' + dir_out)
+    return dir_out
+
 
 
 def send_email_with_file(file_excel=''):
@@ -95,14 +115,16 @@ def send_email(_server ='', _port='25', _from='', _to='', _subj='', _text='', _f
     # smtp.starttls()
     # smtp.ehlo()
     # smtp.login(smtp_user, smtp_pwd)
+    recipients =
     smtp.sendmail(mail_from, mail_to, multi_msg.as_string())
 
 
 def main():
     time1 = datetime.now()
     print('Starting at :' + str(time1))
+    file_excel = str(os.path.join(get_output_directory(), cfg.file_csv))
 
-    file_excel = cfg.file_csv.split('.')[0] + '.xlsx'
+    file_excel = file_excel.split('.')[0] + '.xlsx'
     if os.path.isfile(file_excel):
         send_email_with_file(file_excel)
     else:
