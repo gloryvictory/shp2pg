@@ -52,7 +52,7 @@ def get_output_directory():
 
 def send_email_with_file(file_excel=''):
     if (len(str(file_excel))):
-        body_text = str('ОК - файл ' + file_excel + " Во вложении!")
+        body_text = str('ОК - файл ' + file_excel + " Во вложении! Это результат выполнения скрипта на сервере 10.57.10.45 из папки /etc/cron.daily имя скрипта: start_python_scripts.sh. Результат складывается в /tmp/shp_info/*")
         subject = 'Результат запуска скрипта. Excel file - ситуация с шейп-файлами'  # заголовок письма
         send_email(cfg.server_mail, cfg.server_mail_port, cfg.send_from, cfg.send_to, subject, body_text, file_excel)
 
