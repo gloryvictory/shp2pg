@@ -177,8 +177,6 @@ def do_shp_dir(dir_input=''):
                             ident = Sridentify(call_remote_api=False)  # Sridentify() # if we need  remote call
                             ident.from_file(file_prj)
                             srid = ident.get_epsg()
-                            print(file_prj)
-                            print(srid)
                             if len(str(srid)):
                                 csv_dict['SRID'] = str(srid)
                             else:
