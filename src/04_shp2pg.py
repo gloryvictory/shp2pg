@@ -71,18 +71,20 @@ def shp_to_4326(dir_in='', dir_out=''):
 
             file_name = file_in.split('.')[0]
             table_name = file.split('.')[0]
-            if ext == "shp":
+            if file.endswith('shp'):    #ext == "shp":
                 # Prj file exist
                 file_prj = file_name + '.prj'
                 if os.path.isfile(file_prj):
-                    ident = Sridentify()
-                    ident.from_file(file_prj)
-                    srid = ident.get_epsg()
-                    if str(srid) != 'None':
-                        srid_source = ' -s ' + str(srid) + ':4326 '
-                        cmd_line = program_shp2pgsql + ' -d -I -W "cp1251"' + srid_source + ' ' + file_in + ' \"' + schema + '\".\"' + table_name + "\"" + ' -h ' + cfg.host + ' -u ' + cfg.user + ' |psql -d ' + cfg.database_gis + ' -U '+ cfg.user
-                        print(cmd_line)
-
+                    try:
+                        ident = Sridentify(call_remote_api=False)  # Sridentify() # if we need  remote call
+                        ident.from_file(file_prj)
+                        srid = ident.get_epsg()
+                        if str(srid) != 'None':
+                            srid_source = ' -s ' + str(srid) + ':4326 '
+                            cmd_line = program_shp2pgsql + ' -d -I -W "cp1251"' + srid_source + ' ' + file_in + ' \"' + schema + '\".\"' + table_name + "\"" + ' -h ' + cfg.host + ' -u ' + cfg.user + ' |psql -d ' + cfg.database_gis + ' -U '+ cfg.user
+                            print(cmd_line)
+                    except:
+                        print('Ошибка в файле: ' + file_prj)
                 #print(os.path.join(r, file))
                 #print(file_in)
 
