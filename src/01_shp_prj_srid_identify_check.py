@@ -34,7 +34,7 @@ def file_get_first_line(filename=''):
     first_line = cfg.value_no
     if len(str(filename)):
         with open(filename, errors='ignore') as f:
-            first_line = f.readline()
+            first_line = f.readline().strip()
             f.close()
     return str(first_line)
 
