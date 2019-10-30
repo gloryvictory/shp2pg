@@ -27,17 +27,15 @@ import cfg #some global configurations
 global dir_shp_in
 global program_shp2pgsql
 
-dir_shp_in = cfg.folder_win
-dir_shp_in_linux = cfg.folder_linux
+dir_shp_in = ''
+
 # Linux platform
 if _platform == "linux" or _platform == "linux2" or _platform == "darwin":
     dir_shp_in = dir_shp_in_linux
 # Windows or Windows 64-bit
-#if _platform == "win32" or _platform == "win64":
+if _platform == "win32" or _platform == "win64":
+    dir_shp_in = cfg.folder_win
 
-
-#global dir_shp_out
-#dir_shp_out = "c:\\test2"
 #global program_ogr2ogr
 
 #program_ogr2ogr = "ogr2ogr"
