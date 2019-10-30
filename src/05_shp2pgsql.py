@@ -75,6 +75,23 @@ def get_input_directory():
         exit(1)
     return dir_shp_in
 
+
+def do_shp_dir(dir_input=''):
+    for root, subdirs, files in os.walk(dir_input):
+        for file in os.listdir(root):
+            file_path = str(os.path.join(root, file)).lower()
+            ext = '.'.join(file.split('.')[1:]).lower()
+            if file_path.endswith('shp'):  # ext == "shp":
+                file_name = file_path.split('.')[0]
+                file_prj = file_name + '.prj'
+                file_cp = file_name + '.cpg'
+                if os.path.isfile(file_prj) and os.path.isfile(file_cp):
+                    print(file_name)
+                else:
+                    print("Filename " + file_prj + ' or ' + file_cp + ' does not exist.')
+
+
+
 # ---------------- do main --------------------------------
 def main():
     time1 = datetime.now()
@@ -82,8 +99,8 @@ def main():
 
     dir_input = get_input_directory()
 
-    #do_shp_dir(dir_input)
-    print(dir_input)
+    do_shp_dir(dir_input)
+    #print(dir_input)
 
     # csv2xls()
 
