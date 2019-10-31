@@ -19,7 +19,7 @@ import os.path
 import sys
 from sridentify import Sridentify
 #from time import strftime   # Load just the strftime Module from Time
-#import logging
+import logging
 from datetime import datetime
 from sys import platform as _platform
 import cfg #some global configurations
@@ -120,9 +120,10 @@ def get_output_directory():
 def do_shp_dir(dir_input=''):
     program_shp2pgsql = 'shp2pgsql'
     #do log file
-    import logging
     file_csv = str(os.path.join(get_output_directory(), cfg.file_log))
-    print(file_csv)
+
+    for handler in logging.root.handlers[:]: #Remove all handlers associated with the root logger object.
+        logging.root.removeHandler(handler)
     logging.basicConfig(filename=file_csv, format='%(asctime)s %(levelname)s %(message)s', level=logging.DEBUG, filemode='w') #
     logging.info(file_csv)
     #do main part
