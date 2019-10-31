@@ -17,15 +17,13 @@
 import os                   # Load the Library Module
 import os.path
 import sys
-#from sridentify import Sridentify
+from sridentify import Sridentify
 #from time import strftime   # Load just the strftime Module from Time
-#import logging
+import logging
 from datetime import datetime
 from sys import platform as _platform
 import cfg #some global configurations
 
-#global dir_shp_in
-#global program_shp2pgsql
 
 
 def get_input_directory():
@@ -76,21 +74,62 @@ def get_input_directory():
     return dir_shp_in
 
 
+def get_output_directory():
+    dir_out = str(os.getcwd())
+    # Linux platform
+    if _platform == "linux" or _platform == "linux2" or _platform == "darwin":
+        dir_out = cfg.folder_out_linux
+        if os.path.exists(dir_out) and os.path.isdir(dir_out):
+            return dir_out
+    if _platform == "win32" or _platform == "win64":  # Windows or Windows 64-bit
+        dir_out = cfg.folder_out_win
+        if os.path.exists(dir_out) and os.path.isdir(dir_out):
+            return dir_out
+    else:
+        dir_out = str(os.getcwd())
+        print(
+            'Output directories from config wrong: ' + cfg.folder_out_win + ' or ' + cfg.folder_out_linux + ' Using current directory: ' + dir_out)
+    print('Using Output directory: ' + dir_out)
+    return dir_out
+
 def do_shp_dir(dir_input=''):
-    for root, subdirs, files in os.walk(dir_input):
-        for file in os.listdir(root):
-            file_path = str(os.path.join(root, file)).lower()
-            ext = '.'.join(file.split('.')[1:]).lower()
-            if file_path.endswith('shp'):  # ext == "shp":
-                file_name = file_path.split('.')[0]
-                file_prj = file_name + '.prj'
-                file_cp = file_name + '.cpg'
-                if os.path.isfile(file_prj) and os.path.isfile(file_cp):
-                    print(file_name)
-                else:
-                    print("Filename " + file_prj + ' or ' + file_cp + ' does not exist.')
 
+    file_csv = str(os.path.join(get_output_directory(), cfg.file_log)).lower()
+    logging.basicConfig(filename=file_csv, format='%(asctime)s %(levelname)s %(message)s', level=logging.DEBUG, filemode='w')
+    try:
+        for root, subdirs, files in os.walk(dir_input):
+            for file in os.listdir(root):
+                _srid=''
+                _codepage=''
+                file_path = str(os.path.join(root, file)).lower()
+                ext = '.'.join(file.split('.')[1:]).lower()
+                if file_path.endswith('shp'):  # ext == "shp":
+                    file_name = file_path.split('.')[0]
+                    file_prj = file_name + '.prj'
+                    file_cp = file_name + '.cpg'
+                    if os.path.isfile(file_prj) and os.path.isfile(file_cp):
+                        logging.info(file_path)
+                        if os.path.isfile(file_prj):
+                            try:
+                                ident = Sridentify(call_remote_api=False)  # Sridentify() # if we need  remote call
+                                ident.from_file(file_prj)
+                                _srid = ident.get_epsg()
+                                if str(srid) != 'None':
+                                    srid_source = ' -s ' + str(_srid) + ':4326 '
+                                    cmd_line = program_shp2pgsql + ' -d -I -W "cp1251"' + srid_source + ' ' + file_in + ' \"' + schema + '\".\"' + table_name + "\"" + ' -h ' + cfg.host + ' -u ' + cfg.user + ' |psql -d ' + cfg.database_gis + ' -U ' + cfg.user
+                                    print(cmd_line)
+                            except:
+                                print('Ошибка в файле: ' + file_prj)
 
+                        if os.path.isfile(file_cp):
+                            _codepage = ''
+
+                    else:
+                        logging.error("Filename " + file_prj + ' or ' + file_cp + ' does not exist.')
+
+    except Exception as e:
+        logging.error("Exception occurred", exc_info=True)
+        logging.exception(e)
 
 # ---------------- do main --------------------------------
 def main():
