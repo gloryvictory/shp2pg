@@ -38,7 +38,6 @@ def file_get_first_line(filename=''):
 def get_codepage_from_file(filename=''):
     str_result = ''
     first_line = file_get_first_line(filename)
-
     if first_line.endswith('1251') or first_line.endswith('utf-8'):
         if first_line.endswith('1251'):
             str_result = 'cp1251'
@@ -46,8 +45,6 @@ def get_codepage_from_file(filename=''):
             str_result = 'utf-8'
     else:
         str_result = first_line
-    #print(str_result)
-
     return str_result.upper()
 
 
@@ -143,11 +140,12 @@ def do_shp_dir(dir_input=''):
                         logging.info(file_path)
 
                         if os.path.isfile(file_cp):
-
                             _codepage = get_codepage_from_file(file_cp)
-                            str_err = file_cp + ' has codepage ' + _codepage
+                            str_err = str(file_cp + ' has codepage ' + _codepage)
+                            str_err = str_err.encode("cp1251").decode('cp1251').encode('utf8').decode('utf8')
+
                             logging.info(str_err)
-                            print(str_err)
+                            #print(str_err)
 
                         if os.path.isfile(file_prj):
                             try:
@@ -155,9 +153,11 @@ def do_shp_dir(dir_input=''):
                                 ident.from_file(file_prj)
                                 _srid = ident.get_epsg()
                             except Exception as e:
+                                logging.error('Ошибка в файле: ' + file_prj)
                                 logging.error("Exception occurred", exc_info=True)
                                 logging.exception(e)
-                                print('Ошибка в файле: ' + file_prj)
+
+
                         if str(_srid) != 'None':
                             srid_source = ' -s ' + str(_srid) + ':4326 '
                             cmd_line = program_shp2pgsql + ' -d -I '+ _codepage + ' ' \
