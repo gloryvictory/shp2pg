@@ -26,6 +26,31 @@ import cfg #some global configurations
 
 
 
+# get first line from file
+def file_get_first_line(filename=''):
+    first_line = ''
+    if len(str(filename)):
+        with open(filename, errors='ignore') as f:
+            first_line = f.readline().lower().strip()
+    return str(first_line)
+
+
+def get_codepage_from_file(filename=''):
+    str_result = ''
+    first_line = file_get_first_line(filename)
+
+    if first_line.endswith('1251') or first_line.endswith('utf-8'):
+        if first_line.endswith('1251'):
+            str_result = 'cp1251'
+        if first_line.endswith('utf-8'):
+            str_result = 'utf-8'
+    else:
+        str_result = first_line
+    #print(str_result)
+
+    return str_result.upper()
+
+
 def get_input_directory():
     # get from config
     dir_shp_in_win = cfg.folder_win
@@ -93,9 +118,12 @@ def get_output_directory():
     return dir_out
 
 def do_shp_dir(dir_input=''):
-
+    #do log file
     file_csv = str(os.path.join(get_output_directory(), cfg.file_log)).lower()
+    print(file_csv)
     logging.basicConfig(filename=file_csv, format='%(asctime)s %(levelname)s %(message)s', level=logging.DEBUG, filemode='w')
+
+    #do main part
     try:
         for root, subdirs, files in os.walk(dir_input):
             for file in os.listdir(root):
@@ -109,6 +137,14 @@ def do_shp_dir(dir_input=''):
                     file_cp = file_name + '.cpg'
                     if os.path.isfile(file_prj) and os.path.isfile(file_cp):
                         logging.info(file_path)
+
+                        if os.path.isfile(file_cp):
+
+                            _codepage = get_codepage_from_file(file_cp)
+                            str_err = file_cp + ' has codepage ' + _codepage
+                            logging.info(str_err)
+                            print(str_err)
+
                         if os.path.isfile(file_prj):
                             try:
                                 ident = Sridentify(call_remote_api=False)  # Sridentify() # if we need  remote call
@@ -121,8 +157,6 @@ def do_shp_dir(dir_input=''):
                             except:
                                 print('Ошибка в файле: ' + file_prj)
 
-                        if os.path.isfile(file_cp):
-                            _codepage = ''
 
                     else:
                         logging.error("Filename " + file_prj + ' or ' + file_cp + ' does not exist.')
