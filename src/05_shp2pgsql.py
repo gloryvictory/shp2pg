@@ -19,7 +19,7 @@ import os.path
 import sys
 from sridentify import Sridentify
 #from time import strftime   # Load just the strftime Module from Time
-import logging
+#import logging
 from datetime import datetime
 from sys import platform as _platform
 import cfg #some global configurations
@@ -118,19 +118,22 @@ def get_output_directory():
     return dir_out
 
 def do_shp_dir(dir_input=''):
+    program_shp2pgsql = 'shp2pgsql'
     #do log file
-    file_csv = str(os.path.join(get_output_directory(), cfg.file_log)).lower()
+    import logging
+    file_csv = str(os.path.join(get_output_directory(), cfg.file_log))
     print(file_csv)
-    logging.basicConfig(filename=file_csv, format='%(asctime)s %(levelname)s %(message)s', level=logging.DEBUG, filemode='w')
-
+    logging.basicConfig(filename=file_csv, format='%(asctime)s %(levelname)s %(message)s', level=logging.DEBUG, filemode='w') #
+    logging.info(file_csv)
     #do main part
     try:
         for root, subdirs, files in os.walk(dir_input):
             for file in os.listdir(root):
-                _srid=''
-                _codepage=''
+                _srid = ''
+                _codepage = ''
                 file_path = str(os.path.join(root, file)).lower()
                 ext = '.'.join(file.split('.')[1:]).lower()
+                table_name = file.split('.')[0]
                 if file_path.endswith('shp'):  # ext == "shp":
                     file_name = file_path.split('.')[0]
                     file_prj = file_name + '.prj'
@@ -150,13 +153,21 @@ def do_shp_dir(dir_input=''):
                                 ident = Sridentify(call_remote_api=False)  # Sridentify() # if we need  remote call
                                 ident.from_file(file_prj)
                                 _srid = ident.get_epsg()
-                                if str(srid) != 'None':
-                                    srid_source = ' -s ' + str(_srid) + ':4326 '
-                                    cmd_line = program_shp2pgsql + ' -d -I -W "cp1251"' + srid_source + ' ' + file_in + ' \"' + schema + '\".\"' + table_name + "\"" + ' -h ' + cfg.host + ' -u ' + cfg.user + ' |psql -d ' + cfg.database_gis + ' -U ' + cfg.user
-                                    print(cmd_line)
-                            except:
+                            except Exception as e:
+                                logging.error("Exception occurred", exc_info=True)
+                                logging.exception(e)
                                 print('Ошибка в файле: ' + file_prj)
-
+                        if str(_srid) != 'None':
+                            srid_source = ' -s ' + str(_srid) + ':4326 '
+                            cmd_line = program_shp2pgsql + ' -d -I '+ _codepage + ' ' \
+                                    + srid_source \
+                                    + ' ' + file_path \
+                                    + ' \"' + cfg.schema + '\".\"' + table_name + "\"" \
+                                    + ' -h ' + cfg.host \
+                                    + ' -u ' + cfg.user \
+                                    + ' |psql -d ' + cfg.database_gis \
+                                    + ' -U ' + cfg.user
+                            print(cmd_line)
 
                     else:
                         logging.error("Filename " + file_prj + ' or ' + file_cp + ' does not exist.')
