@@ -176,7 +176,8 @@ def do_shp_dir(dir_input=''):
                                     #+ ' |psql -d ' + cfg.database_gis \
                                     #+ ' -U ' + cfg.user
                             print(cmd_line)
-
+                            #import subprocess
+                            #subprocess.call(cmd_line, shell=True)
                     else:
                         logging.error("Filename " + file_prj + ' or ' + file_cp + ' does not exist.')
 
