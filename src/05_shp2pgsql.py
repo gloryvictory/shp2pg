@@ -13,6 +13,9 @@
 #
 # Description   : This script will search any *.shp files in the given directory by list (in file_list_shp.txt ) and convert to EPSG:SRID 4326 and load to postgresql+postgis
 # converting by using this utility : shp2pgsql -d -I -W "cp1251" -s 4024:4326  c:\test\sta.shp "GISSCHEMA"."sta" -h 127.0.0.1 -u GISUSER |psql -d GISTEST -U GISUSER
+#ogr2ogr  -skipfailures  -overwrite -lco GEOMETRY_NAME=geom -lco LAUNDER=NO -lco precision=NO -a_srs "EPSG:4326" -f "PostgreSQL" PG:"dbname=gisdb host=10.57.10.45 user=test password=test" /mnt/gisdata/ловушки/lov_zs.shp -nln "gis.lov_zs"
+#https://kolesovdmitry.github.io/gis_course_win/2/ogr2ogr.html
+
 
 import os                   # Load the Library Module
 import os.path
@@ -117,7 +120,8 @@ def get_output_directory():
 def do_shp_dir(dir_input=''):
     program_shp2pgsql = 'shp2pgsql'
     #do log file
-    file_csv = str(os.path.join(get_output_directory(), cfg.file_log))
+    dir_out = get_output_directory()
+    file_csv = str(os.path.join(dir_out, cfg.file_log))
 
     for handler in logging.root.handlers[:]: #Remove all handlers associated with the root logger object.
         logging.root.removeHandler(handler)
@@ -142,8 +146,8 @@ def do_shp_dir(dir_input=''):
                         if os.path.isfile(file_cp):
                             _codepage = get_codepage_from_file(file_cp)
                             str_err = str(file_cp + ' has codepage ' + _codepage)
-                            str_err = str_err.encode("cp1251").decode('cp1251').encode('utf8').decode('utf8')
-
+                            str_err = str_err.encode("cp1251").decode('cp1251')
+                            #encode("cp1251").decode('cp1251').decode('utf8')
                             logging.info(str_err)
                             #print(str_err)
 
@@ -160,14 +164,17 @@ def do_shp_dir(dir_input=''):
 
                         if str(_srid) != 'None':
                             srid_source = ' -s ' + str(_srid) + ':4326 '
-                            cmd_line = program_shp2pgsql + ' -d -I '+ _codepage + ' ' \
+                            cmd_line = program_shp2pgsql + ' -d -I -W '+ ' \"' + _codepage + '\" '\
                                     + srid_source \
                                     + ' ' + file_path \
-                                    + ' \"' + cfg.schema + '\".\"' + table_name + "\"" \
+                                    + ' \"' + cfg.schema + '\".\"' \
+                                    + table_name + "\"" \
                                     + ' -h ' + cfg.host \
                                     + ' -u ' + cfg.user \
-                                    + ' |psql -d ' + cfg.database_gis \
-                                    + ' -U ' + cfg.user
+                                    + ' -P ' + cfg.user_password\
+                                    + ' > ' + str(os.path.join(dir_out, table_name + '.sql'))
+                                    #+ ' |psql -d ' + cfg.database_gis \
+                                    #+ ' -U ' + cfg.user
                             print(cmd_line)
 
                     else:
