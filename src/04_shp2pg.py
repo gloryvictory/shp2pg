@@ -130,40 +130,6 @@ def get_output_directory():
     print('Using Output directory: ' + dir_out)
     return dir_out
 
-# run sql script through the psycopg2
-# def sql_run(host='localhost', dbname='', user='', password='',  sql_statement=''):
-#     # import psycopg2
-#     # import sys
-#     conn_string = 'host=' + '\'' + host + '\'' + ' dbname=\'' + dbname + '\'' + ' user=\'' + user + '\'' \
-#                   + ' password=\'' + password + '\''
-#     if len(str(sql_statement)) and len(str(host)) and len(str(dbname)) and len(str(user)) and len(str(password)):
-#         con = None
-#         print(conn_string + sql_statement)
-#         try:
-#             con = psycopg2.connect(conn_string) # should be look like "host='localhost' dbname='testdb' user='pythonspot' password='password'"
-#             cur = con.cursor()
-#             cur.execute(sql_statement)
-#             con.commit()
-#         except Exception as e:
-#             logging.error("Exception occurred", exc_info=True)
-#             logging.exception(e)
-#             if con:
-#                 con.rollback()
-#             print('Error %s' % e)
-#             #sys.exit(1)
-#             return
-#         finally:
-#             if con:
-#                 con.close()
-#     else:
-#         ss = "SQL Statement is NULL. Please specify SQL Statement."
-#         print(ss)
-#         logging.error(conn_string)
-#         logging.error(sql_statement)
-#         logging.error(ss)
-#         #sys.exit(1)
-#         return
-
 
 # run sql script through the psql
 def psql_run(host='localhost', dbname='', user='', password='',  sql_statement=''):
@@ -197,7 +163,7 @@ def psql_run(host='localhost', dbname='', user='', password='',  sql_statement='
 
 
 def do_shp_dir(dir_input=''):
-    program_shp2pgsql = 'shp2pgsql'
+    program_shp2pgsql = 'ogr2ogr'
     #do log file
     dir_out = get_output_directory()
     file_csv = str(os.path.join(dir_out, cfg.file_log))
@@ -253,15 +219,26 @@ def do_shp_dir(dir_input=''):
                         if str(_srid) != 'None':
                             srid_source = ' -s ' + str(_srid) + ':4326 '
                             file_sql = str(os.path.join(dir_out, table_name + '.sql'))
-                            cmd_line = program_shp2pgsql + ' -d -I -W '+ ' \"' + _codepage + '\" '\
-                                    + srid_source \
-                                    + ' ' + file_path \
-                                    + ' \"' + cfg.schema + '\".\"' \
-                                    + table_name + "\"" \
-                                    + ' -h ' + cfg.host \
-                                    + ' -u ' + cfg.user \
-                                    + ' -P ' + cfg.user_password\
-                                    + ' > ' + file_sql
+                            #ogr2ogr  -skipfailures  -overwrite -lco GEOMETRY_NAME=geom -lco LAUNDER=NO -lco precision=NO -a_srs "EPSG:4326" -f "PostgreSQL" PG:"dbname=gisdb host=10.57.10.45 user=test password=test" /mnt/gisdata/ловушки/lov_zs.shp -nln "gis.lov_zs"
+                            cmd_line = program_shp2pgsql + ' -skipfailures  -overwrite -lco GEOMETRY_NAME=geom -lco LAUNDER=NO -lco precision=NO ' + \
+                                '-a_srs \"EPSG:4326\"' + 
+                                '-f ' + '\"PostgreSQL\" PG:\"dbname=' + cfg.database_gis + \
+                                    ' host=' + cfg.host + \
+                                    ' user=' + cfg.user + \
+                                    ' password=' + cfg.user_password + '\"' + \
+                                    ' ' +  file_path + \
+                                    ' -nln ' + '\"' + cfg.schema + '.' + table_name + '\"'
+
+
+                                # ' \"' + _codepage + '\" '\
+                                #     + srid_source \
+                                #     + ' ' + file_path \
+                                #     + ' \"' + cfg.schema + '\".\"' \
+                                #     + table_name + "\"" \
+                                #     + ' -h ' + cfg.host \
+                                #     + ' -u ' + cfg.user \
+                                #     + ' -P ' + cfg.user_password\
+                                #     + ' > ' + file_sql
                                     #+ ' |psql -d ' + cfg.database_gis \
                                     #+ ' -U ' + cfg.user
                             print(cmd_line)
