@@ -33,11 +33,12 @@ try:
 except Exception as e:
     print("Exception occurred " + str(e), exc_info=True)
     print("try: pip install sridentify")
-try:
-    import psycopg2
-except Exception as e:
-    print("Exception occurred " + str(e), exc_info=True)
-    print("try: pip install psycopg2")
+
+# try:
+#     import psycopg2
+# except Exception as e:
+#     print("Exception occurred " + str(e), exc_info=True)
+#     print("try: pip install psycopg2")
 
 import cfg #some global configurations
 
@@ -131,20 +132,19 @@ def get_output_directory():
     print('Using Output directory: ' + dir_out)
     return dir_out
 
-
-# def file_sql_run(host='localhost', dbname='', user='', password='', filename=''):
-#     if len(str(filename)) and os.path.isfile(filename):
-#         conn_string = 'host=' + '\'' + host + '\'' + ' dbname=\'' + dbname + '\'' + ' user=\'' + user + '\'' \
-#                       + ' password=\'' + password + '\''
+# run sql script through the psycopg2
+# def sql_run(host='localhost', dbname='', user='', password='',  sql_statement=''):
+#     # import psycopg2
+#     # import sys
+#     conn_string = 'host=' + '\'' + host + '\'' + ' dbname=\'' + dbname + '\'' + ' user=\'' + user + '\'' \
+#                   + ' password=\'' + password + '\''
+#     if len(str(sql_statement)) and len(str(host)) and len(str(dbname)) and len(str(user)) and len(str(password)):
 #         con = None
-#         print(conn_string + filename)
+#         print(conn_string + sql_statement)
 #         try:
-#             con = psycopg2.connect(
-#                 conn_string)  # should be look like "host='localhost' dbname='testdb' user='pythonspot' password='password'"
+#             con = psycopg2.connect(conn_string) # should be look like "host='localhost' dbname='testdb' user='pythonspot' password='password'"
 #             cur = con.cursor()
-#             sql_file = open(filename, 'r')
-#             cur.execute(sql_file.read())
-#
+#             cur.execute(sql_statement)
 #             con.commit()
 #         except Exception as e:
 #             logging.error("Exception occurred", exc_info=True)
@@ -158,42 +158,43 @@ def get_output_directory():
 #             if con:
 #                 con.close()
 #     else:
-#         ss = "SQL File doesn't exist!!!  Please specify SQL file."
+#         ss = "SQL Statement is NULL. Please specify SQL Statement."
 #         print(ss)
+#         logging.error(conn_string)
+#         logging.error(sql_statement)
 #         logging.error(ss)
-#         return
 #         #sys.exit(1)
+#         return
 
 
-def sql_run(host='localhost', dbname='', user='', password='',  sql_statement=''):
-    # import psycopg2
-    # import sys
-    if len(str(sql_statement)):
-        conn_string = 'host=' + '\'' + host + '\'' + ' dbname=\'' + dbname + '\'' + ' user=\'' + user + '\'' \
-                      + ' password=\'' + password + '\''
-        con = None
-        print(conn_string + sql_statement)
+# run sql script through the psql
+def psql_run(host='localhost', dbname='', user='', password='',  sql_statement=''):
+
+    cmd_line_psql = 'psql ' + '\" dbname=\'' + dbname + '\'' + ' ' \
+                                                                         ' user=\'' + user + '\'' + \
+                    ' password=\'' + password + '\'' + \
+                    ' host=\'' + host + '\'' + '\"' + \
+                    ' -c ' + '\''+ sql_statement + '\''
+    if len(str(sql_statement)) and len(str(host)) and len(str(dbname)) and len(str(user)) and len(str(password)):
         try:
-            con = psycopg2.connect(conn_string) # should be look like "host='localhost' dbname='testdb' user='pythonspot' password='password'"
-            cur = con.cursor()
-            cur.execute(sql_statement)
-            con.commit()
+            print(cmd_line_psql)
+            logging.info(cmd_line_psql)
+            p = subprocess.Popen(cmd_line_psql, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+            for line in p.stdout.readlines():
+                print(line)
+            retval = p.wait()
+
         except Exception as e:
             logging.error("Exception occurred", exc_info=True)
             logging.exception(e)
-            if con:
-                con.rollback()
-            print('Error %s' % e)
-            #sys.exit(1)
+            # sys.exit(1)
             return
-        finally:
-            if con:
-                con.close()
     else:
         ss = "SQL Statement is NULL. Please specify SQL Statement."
         print(ss)
+        logging.error(cmd_line_psql)
+        logging.error(sql_statement)
         logging.error(ss)
-        #sys.exit(1)
         return
 
 
@@ -208,10 +209,13 @@ def do_shp_dir(dir_input=''):
     logging.basicConfig(filename=file_csv, format='%(asctime)s %(levelname)s %(message)s', level=logging.DEBUG, filemode='w') #
     logging.info(file_csv)
 
+
     sql1 = 'DROP SCHEMA ' + cfg.schema + ' CASCADE;'
-    sql_run(cfg.host, cfg.database_gis, cfg.user, cfg.user_password, sql1)
+    psql_run(cfg.host, cfg.database_gis, cfg.user, cfg.user_password, sql1)
+    logging.info(sql1)
     sql2 = 'CREATE SCHEMA ' + cfg.schema + ';'
-    sql_run(cfg.host, cfg.database_gis, cfg.user, cfg.user_password, sql2)
+    psql_run(cfg.host, cfg.database_gis, cfg.user, cfg.user_password, sql2)
+    logging.info(sql2)
 
     #do main part
     try:
