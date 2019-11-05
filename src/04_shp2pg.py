@@ -134,7 +134,8 @@ def get_output_directory():
 # run sql script through the psql
 def psql_run(host='localhost', dbname='', user='', password='',  sql_statement=''):
 
-    cmd_line_psql = 'psql ' + '\" dbname=\'' + dbname + '\'' + ' ' \
+    psql_command = '/Applications/Postgres.app/Contents/Versions/10/bin/psql'
+    cmd_line_psql = psql_command + ' '  + '\" dbname=\'' + dbname + '\'' + ' ' \
                                                                          ' user=\'' + user + '\'' + \
                     ' password=\'' + password + '\'' + \
                     ' host=\'' + host + '\'' + '\"' + \
@@ -221,7 +222,7 @@ def do_shp_dir(dir_input=''):
                             file_sql = str(os.path.join(dir_out, table_name + '.sql'))
                             #ogr2ogr  -skipfailures  -overwrite -lco GEOMETRY_NAME=geom -lco LAUNDER=NO -lco precision=NO -a_srs "EPSG:4326" -f "PostgreSQL" PG:"dbname=gisdb host=10.57.10.45 user=test password=test" /mnt/gisdata/ловушки/lov_zs.shp -nln "gis.lov_zs"
                             cmd_line = program_shp2pgsql + ' -skipfailures  -overwrite -lco GEOMETRY_NAME=geom -lco LAUNDER=NO -lco precision=NO ' + \
-                                '-a_srs \"EPSG:4326\"' + 
+                                '-a_srs \"EPSG:4326\"' + \
                                 '-f ' + '\"PostgreSQL\" PG:\"dbname=' + cfg.database_gis + \
                                     ' host=' + cfg.host + \
                                     ' user=' + cfg.user + \
@@ -239,7 +240,7 @@ def do_shp_dir(dir_input=''):
                                 #     + ' -u ' + cfg.user \
                                 #     + ' -P ' + cfg.user_password\
                                 #     + ' > ' + file_sql
-                                    #+ ' |psql -d ' + cfg.database_gis \
+                                    #+ ' |psql -d ' + cfsource g.database_gis \
                                     #+ ' -U ' + cfg.user
                             print(cmd_line)
                             p = subprocess.Popen(cmd_line, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
@@ -251,7 +252,8 @@ def do_shp_dir(dir_input=''):
                             # cmd_line_psql = 'psql -d ' + cfg.database_gis + ' -U ' + cfg.user + ' -f ' + file_sql
                             # psql "dbname='gisdb' user='test' password='test' host='10.57.10.45'" - f / home / glory / 1 / out / газопровод_сводный_2015.sql
                             #file_sql_run(cfg.host, cfg.database_gis, cfg.user, cfg.user_password, file_sql)
-                            cmd_line_psql = 'psql ' + '\" dbname=\'' + cfg.database_gis + '\'' + ' ' \
+                            psql_command = '/Applications/Postgres.app/Contents/Versions/10/bin/psql'
+                            cmd_line_psql = psql_command + ' ' + '\" dbname=\'' + cfg.database_gis + '\'' + ' ' \
                                                                                                  ' user=\'' + cfg.user + '\'' + \
                                             ' password=\'' + cfg.user_password + '\'' + \
                                             ' host=\'' + cfg.host + '\'' + '\"' + \
