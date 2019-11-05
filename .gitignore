@@ -11,3 +11,4 @@ venv
 test.code-workspace
 examples
 cfg.py
+out
