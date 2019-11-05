@@ -13,18 +13,32 @@
 #
 # Description   : This script will search any *.shp files in the given directory by list (in file_list_shp.txt ) and convert to EPSG:SRID 4326 and load to postgresql+postgis
 # converting by using this utility : shp2pgsql -d -I -W "cp1251" -s 4024:4326  c:\test\sta.shp "GISSCHEMA"."sta" -h 127.0.0.1 -u GISUSER |psql -d GISTEST -U GISUSER
+#>shp2pgsql -I -s 4269:4326 someshapefile.shp <schema>.<table> | psql -U <user> -d <dbname> -h <hostaddress> -p 5432
 #ogr2ogr  -skipfailures  -overwrite -lco GEOMETRY_NAME=geom -lco LAUNDER=NO -lco precision=NO -a_srs "EPSG:4326" -f "PostgreSQL" PG:"dbname=gisdb host=10.57.10.45 user=test password=test" /mnt/gisdata/ловушки/lov_zs.shp -nln "gis.lov_zs"
 #https://kolesovdmitry.github.io/gis_course_win/2/ogr2ogr.html
+#>ogr2ogr -f "PostgreSQL" "PG:host=<hostaddress> user=<user> dbname=<dbname> password=<password>" "C:/shapefile.shp" -nln <schema>.<table>
 
 
 import os                   # Load the Library Module
 import os.path
 import sys
-from sridentify import Sridentify
+from sys import platform as _platform
 #from time import strftime   # Load just the strftime Module from Time
 import logging
 from datetime import datetime
-from sys import platform as _platform
+import subprocess
+
+try:
+    from sridentify import Sridentify
+except Exception as e:
+    print("Exception occurred " + str(e), exc_info=True)
+    print("try: pip install sridentify")
+try:
+    import psycopg2
+except Exception as e:
+    print("Exception occurred " + str(e), exc_info=True)
+    print("try: pip install psycopg2")
+
 import cfg #some global configurations
 
 
@@ -117,6 +131,36 @@ def get_output_directory():
     print('Using Output directory: ' + dir_out)
     return dir_out
 
+def file_sql_run(filename=''):
+    pass
+
+
+def sql_run(host='localhost', dbname='', user='', password='',  sql_statement=''):
+    # import psycopg2
+    # import sys
+
+    conn_string = 'host=' + '\'' + host + '\'' + ' dbname=\'' + dbname + '\'' + ' user=\'' + user + '\'' \
+                  + ' password=\'' + password + '\''
+    con = None
+    print(conn_string)
+    try:
+        con = psycopg2.connect(conn_string) # should be look like "host='localhost' dbname='testdb' user='pythonspot' password='password'"
+        cur = con.cursor()
+        cur.execute(sql_statement)
+        con.commit()
+    except Exception as e:
+        logging.error("Exception occurred", exc_info=True)
+        logging.exception(e)
+        if con:
+            con.rollback()
+        print('Error %s' % e)
+        sys.exit(1)
+
+    finally:
+        if con:
+            con.close()
+
+
 def do_shp_dir(dir_input=''):
     program_shp2pgsql = 'shp2pgsql'
     #do log file
@@ -164,6 +208,7 @@ def do_shp_dir(dir_input=''):
 
                         if str(_srid) != 'None':
                             srid_source = ' -s ' + str(_srid) + ':4326 '
+                            file_sql = str(os.path.join(dir_out, table_name + '.sql'))
                             cmd_line = program_shp2pgsql + ' -d -I -W '+ ' \"' + _codepage + '\" '\
                                     + srid_source \
                                     + ' ' + file_path \
@@ -172,12 +217,32 @@ def do_shp_dir(dir_input=''):
                                     + ' -h ' + cfg.host \
                                     + ' -u ' + cfg.user \
                                     + ' -P ' + cfg.user_password\
-                                    + ' > ' + str(os.path.join(dir_out, table_name + '.sql'))
+                                    + ' > ' + file_sql
                                     #+ ' |psql -d ' + cfg.database_gis \
                                     #+ ' -U ' + cfg.user
+                            #cmd_line_psql = 'psql -d ' + cfg.database_gis + ' -U ' + cfg.user + ' -f ' + file_sql
+                            cmd_line_psql = 'psql ' +'\" dbname=\'' + cfg.database_gis + '\'' + ' ' \
+                                                        ' user=\'' + cfg.user + '\'' + \
+                                                        ' password=\'' + cfg.user_password + '\'' + \
+                                                        ' host=\'' + cfg.host + '\'' + '\"' + \
+                                                        ' -f ' + file_sql
+                            #psql "dbname='gisdb' user='test' password='test' host='10.57.10.45'" - f / home / glory / 1 / out / газопровод_сводный_2015.sql
+
                             print(cmd_line)
-                            #import subprocess
-                            #subprocess.call(cmd_line, shell=True)
+                            p = subprocess.Popen(cmd_line, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+                            for line in p.stdout.readlines():
+                                print(line)
+                                logging.info(line)
+                            retval = p.wait()
+
+                            # if You want run from cmd 'psql .....etc...' line - uncomment please follow lines
+                            # import subprocess
+                            # print(cmd_line_psql)
+                            # p = subprocess.Popen(cmd_line_psql, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+                            # for line in p.stdout.readlines():
+                            #     print(line)
+                            # retval = p.wait()
+
                     else:
                         logging.error("Filename " + file_prj + ' or ' + file_cp + ' does not exist.')
 
@@ -191,8 +256,11 @@ def main():
     print('Starting at :' + str(time1))
 
     dir_input = get_input_directory()
-
-    do_shp_dir(dir_input)
+    #do_shp_dir(dir_input)
+    sql1 = 'DROP SCHEMA ' + cfg.schema + ' CASCADE;'
+    sql_run(cfg.host, cfg.database_gis, cfg.user, cfg.user_password, sql1)
+    sql2 = 'CREATE SCHEMA ' + cfg.schema + ';'
+    sql_run(cfg.host, cfg.database_gis, cfg.user, cfg.user_password, sql2)
     #print(dir_input)
 
     # csv2xls()

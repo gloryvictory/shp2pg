@@ -16,15 +16,19 @@
 import time
 
 file_csv = str(time.strftime("%Y-%m-%d") + "_shp_info_in_folder_" + ".csv")
+file_log = str(time.strftime("%Y-%m-%d") + "_shp_info_in_folder_" + ".log")
+
 folder_win = 'c:\\test'
 folder_linux = '/mnt/gisdata/'
 folder_out_win = 'C:\\out'
 folder_out_linux = '/tmp/'
+
 schema = 'GISSCHEMA'
 host = 'localhost'
 user = 'testuser'
 user_password = 'test'
 database_gis = 'gisdb'
+
 csv_delimiter = ';'
 value_yes = 'YES'
 value_no = 'NO'
