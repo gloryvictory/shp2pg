@@ -262,7 +262,6 @@ def do_shp_dir(dir_input=''):
                                     + ' > ' + file_sql
                                     #+ ' |psql -d ' + cfg.database_gis \
                                     #+ ' -U ' + cfg.user
-
                             print(cmd_line)
                             p = subprocess.Popen(cmd_line, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
                             for line in p.stdout.readlines():
