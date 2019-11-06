@@ -196,10 +196,7 @@ def do_shp_dir(dir_input=''):
                             _codepage = get_codepage_from_file(file_cp)
                             str_err = str(file_cp + ' has codepage ' + _codepage)
                             str_err = str_err.encode("cp1251").decode('cp1251')
-                            #encode("cp1251").decode('cp1251').decode('utf8')
                             logging.info(str_err)
-                            #print(str_err)
-
                         if os.path.isfile(file_prj):
                             try:
                                 ident = Sridentify(call_remote_api=False)  # Sridentify() # if we need  remote call
@@ -210,7 +207,6 @@ def do_shp_dir(dir_input=''):
                                 logging.error("Exception occurred", exc_info=True)
                                 logging.exception(e)
 
-
                         if str(_srid) != 'None':
                             srid_source = ' -s ' + str(_srid) + ':4326 '
                             file_sql = str(os.path.join(dir_out, table_name + '.sql'))
@@ -220,7 +216,7 @@ def do_shp_dir(dir_input=''):
                                     ' host=' + cfg.host + \
                                     ' user=' + cfg.user + \
                                     ' password=' + cfg.user_password + '\"' + \
-                                    ' ' +  file_path + \
+                                    ' ' + file_path + \
                                     ' -nln ' + '\"' + cfg.schema + '.' + table_name + '\"'
                             print(cmd_line)
                             p = subprocess.Popen(cmd_line, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
@@ -260,11 +256,6 @@ def main():
 
     dir_input = get_input_directory()
     do_shp_dir(dir_input)
-
-
-    #print(dir_input)
-
-    # csv2xls()
 
     time2 = datetime.now()
     print('Finishing at :' + str(time2))
