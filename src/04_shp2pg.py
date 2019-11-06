@@ -13,7 +13,7 @@
 #
 # Description   : This script will search any *.shp files in the given directory by list (in file_list_shp.txt ) and convert to EPSG:SRID 4326 and load to postgresql+postgis
 # converting by using this utility : ogr2ogr
-#ogr2ogr  -skipfailures  -overwrite -lco GEOMETRY_NAME=geom -lco LAUNDER=NO -lco precision=NO -a_srs "EPSG:4326" -f "PostgreSQL" PG:"dbname=gisdb host=10.57.10.45 user=test password=test" /mnt/gisdata/ловушки/lov_zs.shp -nln "gis.lov_zs"
+#ogr2ogr  -skipfailures  -overwrite -lco GEOMETRY_NAME=geom -lco LAUNDER=NO -lco precision=NO -a_srs "EPSG:4326" -f "PostgreSQL" PG:"dbname=gisdb host=localhost user=test password=test" /mnt/gisdata/lov_zs.shp -nln "gis.lov_zs"
 #https://kolesovdmitry.github.io/gis_course_win/2/ogr2ogr.html
 #>ogr2ogr -f "PostgreSQL" "PG:host=<hostaddress> user=<user> dbname=<dbname> password=<password>" "C:/shapefile.shp" -nln <schema>.<table>
 
@@ -31,12 +31,6 @@ try:
 except Exception as e:
     print("Exception occurred " + str(e), exc_info=True)
     print("try: pip install sridentify")
-
-# try:
-#     import psycopg2
-# except Exception as e:
-#     print("Exception occurred " + str(e), exc_info=True)
-#     print("try: pip install psycopg2")
 
 import cfg #some global configurations
 
@@ -220,28 +214,14 @@ def do_shp_dir(dir_input=''):
                         if str(_srid) != 'None':
                             srid_source = ' -s ' + str(_srid) + ':4326 '
                             file_sql = str(os.path.join(dir_out, table_name + '.sql'))
-                            #ogr2ogr  -skipfailures  -overwrite -lco GEOMETRY_NAME=geom -lco LAUNDER=NO -lco precision=NO -a_srs "EPSG:4326" -f "PostgreSQL" PG:"dbname=gisdb host=10.57.10.45 user=test password=test" /mnt/gisdata/ловушки/lov_zs.shp -nln "gis.lov_zs"
                             cmd_line = program_shp2pgsql + ' -skipfailures  -overwrite -lco GEOMETRY_NAME=geom -lco LAUNDER=NO -lco precision=NO ' + \
-                                '-a_srs \"EPSG:4326\"' + \
-                                '-f ' + '\"PostgreSQL\" PG:\"dbname=' + cfg.database_gis + \
+                                ' -a_srs \"EPSG:4326\"' + \
+                                ' -f ' + '\"PostgreSQL\" PG:\"dbname=' + cfg.database_gis + \
                                     ' host=' + cfg.host + \
                                     ' user=' + cfg.user + \
                                     ' password=' + cfg.user_password + '\"' + \
                                     ' ' +  file_path + \
                                     ' -nln ' + '\"' + cfg.schema + '.' + table_name + '\"'
-
-
-                                # ' \"' + _codepage + '\" '\
-                                #     + srid_source \
-                                #     + ' ' + file_path \
-                                #     + ' \"' + cfg.schema + '\".\"' \
-                                #     + table_name + "\"" \
-                                #     + ' -h ' + cfg.host \
-                                #     + ' -u ' + cfg.user \
-                                #     + ' -P ' + cfg.user_password\
-                                #     + ' > ' + file_sql
-                                    #+ ' |psql -d ' + cfsource g.database_gis \
-                                    #+ ' -U ' + cfg.user
                             print(cmd_line)
                             p = subprocess.Popen(cmd_line, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
                             for line in p.stdout.readlines():

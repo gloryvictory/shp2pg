@@ -13,10 +13,10 @@
 #               : 1.2 -
 #
 # Description   : just rename cfg_example to cfg.py
-import time
+from time import strftime   # Load just the strftime Module from Time
 
-file_csv = str(time.strftime("%Y-%m-%d") + "_shp_info_in_folder_" + ".csv")
-file_log = str(time.strftime("%Y-%m-%d") + "_shp_info_in_folder_" + ".log")
+file_csv = str(strftime("%Y-%m-%d") + "_shp_info_in_folder_" + ".csv")
+file_log = str(strftime("%Y-%m-%d") + "_shp_info_in_folder_" + ".log")
 
 folder_win = 'c:\\test'
 folder_linux = '/mnt/gisdata/'
@@ -30,6 +30,7 @@ user_password = 'test'
 database_gis = 'gisdb'
 
 csv_delimiter = ';'
+
 value_yes = 'YES'
 value_no = 'NO'
 value_error = 'ERROR'
