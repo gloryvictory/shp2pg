@@ -12,3 +12,6 @@ test.code-workspace
 examples
 cfg.py
 out
+__pycache__
+examples.py
+run_All.bat
