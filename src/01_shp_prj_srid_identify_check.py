@@ -174,7 +174,8 @@ def do_shp_dir(dir_input=''):
                 'DATA_LASTACCESS': '',
                 'DATA_SCRIPT_RUN': '',
                 'PRJ_INFO': '',
-                'REC_COUNT': '',
+                'COUNT_REC': '',
+                'COUNT_FIELDS': '',
                 'FIELDS': ''}  # 'CODEPAGE_DBF': '', # CODEPAGE_DBF -  work a long time
 
     with open(file_csv, 'w', newline='', encoding='utf-8') as csv_file:  # Just use 'w' mode in 3.x
@@ -246,6 +247,7 @@ def do_shp_dir(dir_input=''):
                     if os.path.isfile(file_dbf):
                         sf = shapefile.Reader(file_dbf)
                         fields = sf.fields
+                        fields_count = str(len(fields) - 1)
                         ss = ''
                         for field in fields:
                             ss = ss + str(field[0])
@@ -258,10 +260,13 @@ def do_shp_dir(dir_input=''):
                         records = sf.records()
                         _count = len(records)
 
-                        csv_dict['REC_COUNT'] = str(_count)
+                        csv_dict['COUNT_REC'] = str(_count)
+                        csv_dict['COUNT_FIELDS'] = fields_count
                         csv_dict['FIELDS'] = str(ss)
+
                     else:
-                        csv_dict['REC_COUNT'] = 0
+                        csv_dict['COUNT_REC'] = 0
+                        csv_dict['COUNT_FIELDS'] = 0
                         csv_dict['FIELDS'] = 0
 
                     # defis symbol has found in file name
