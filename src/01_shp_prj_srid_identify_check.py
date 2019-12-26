@@ -23,8 +23,29 @@ from time import strftime  # Load just the strftime Module from Time
 from datetime import datetime
 import csv
 # non standard packages
-from sridentify import Sridentify
-from chardet.universaldetector import UniversalDetector
+#import chardet
+
+try:
+    from sridentify import Sridentify
+except Exception as e:
+    print("Exception occurred " + str(e), exc_info=True)
+    print("try: pip install sridentify")
+
+try:
+    from chardet.universaldetector import UniversalDetector
+except Exception as e:
+    print("Exception occurred " + str(e), exc_info=True)
+    print("try: pip install chardet")
+
+
+try:
+    import shapefile
+except Exception as e:
+    print("Exception occurred " + str(e), exc_info=True)
+    print("try: pip install shapefile")
+
+
+
 
 import cfg  # some global configurations
 
@@ -142,9 +163,19 @@ def do_shp_dir(dir_input=''):
     if os.path.isfile(file_csv):
         os.remove(file_csv)
 
-    csv_dict = {'FILENAME': '', 'PRJ': '', 'SRID': '', 'METADATA': '', 'CODEPAGE': '', 'HAS_DEFIS': '',
-                'DATA_CREATION': '', 'DATA_MODIFY': '', 'DATA_LASTACCESS': '', 'DATA_SCRIPT_RUN': '',
-                'PRJ_INFO': ''}  # 'CODEPAGE_DBF': '', # CODEPAGE_DBF -  work a long time
+    csv_dict = {'FILENAME': '',
+                'PRJ': '',
+                'SRID': '',
+                'METADATA': '',
+                'CODEPAGE': '',
+                'HAS_DEFIS': '',
+                'DATA_CREATION': '',
+                'DATA_MODIFY': '',
+                'DATA_LASTACCESS': '',
+                'DATA_SCRIPT_RUN': '',
+                'PRJ_INFO': '',
+                'REC_COUNT': '',
+                'FIELDS': ''}  # 'CODEPAGE_DBF': '', # CODEPAGE_DBF -  work a long time
 
     with open(file_csv, 'w', newline='', encoding='utf-8') as csv_file:  # Just use 'w' mode in 3.x
 
@@ -209,6 +240,29 @@ def do_shp_dir(dir_input=''):
                     #     csv_dict['CODEPAGE_DBF'] = get_encoding(file_dbf)
                     # else:
                     #     csv_dict['CODEPAGE_DBF'] = _no
+
+                    # Get records Count from DBF - work long time
+                    file_dbf = file_name + '.dbf'
+                    if os.path.isfile(file_dbf):
+                        sf = shapefile.Reader(file_dbf)
+                        fields = sf.fields
+                        ss = ''
+                        for field in fields:
+                            ss = ss + str(field[0])
+                            ss = ss + ", "
+                        ss = ss.strip('DeletionFlag')
+                        if ss.endswith(', '):
+                           ss = ss.lstrip(', ')
+                           ss = ss.rstrip(', ')
+
+                        records = sf.records()
+                        _count = len(records)
+
+                        csv_dict['REC_COUNT'] = str(_count)
+                        csv_dict['FIELDS'] = str(ss)
+                    else:
+                        csv_dict['REC_COUNT'] = 0
+                        csv_dict['FIELDS'] = 0
 
                     # defis symbol has found in file name
                     file_1 = str(file)
