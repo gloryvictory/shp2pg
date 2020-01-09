@@ -41,7 +41,7 @@ except Exception as e:
 try:
     import shapefile
 except Exception as e:
-    print("Exception occurred " + str(e), exc_info=True)
+    print("Exception occurred " + str(e))
     print("try: pip install pyshp")
 
 
