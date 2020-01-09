@@ -42,7 +42,7 @@ try:
     import shapefile
 except Exception as e:
     print("Exception occurred " + str(e), exc_info=True)
-    print("try: pip install shapefile")
+    print("try: pip install pyshp")
 
 
 
